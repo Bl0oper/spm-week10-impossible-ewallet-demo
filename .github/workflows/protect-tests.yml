@@ -1,0 +1,35 @@
+name: protect-tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  protect-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Fail if tests/ changed without the approved-test-change label
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'approved-test-change') }}
+        run: |
+          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- tests/)
+          if [ -z "$changed" ]; then
+            echo "No files under tests/ changed."
+            exit 0
+          fi
+          echo "This PR changes files under tests/:"
+          echo "$changed"
+          if [ "$APPROVED" = "true" ]; then
+            echo "Label 'approved-test-change' is present: a human approved this test change."
+            exit 0
+          fi
+          echo "::error::tests/ changed without the 'approved-test-change' label. A human must review the test change."
+          exit 1

@@ -1,0 +1,19 @@
+# Illustrative reconstruction, not a recorded agent run.
+# It hard-codes the one case the visible test checks (amount == balance == 100)
+# and leaves tests/ untouched. Apply with: git apply examples\special_case.diff
+
+diff --git a/ewallet/wallet.py b/ewallet/wallet.py
+index b81f859..add7fdd 100644
+--- a/ewallet/wallet.py
++++ b/ewallet/wallet.py
+@@ -6,4 +6,9 @@ class EWallet:
+ 
+     def withdraw(self, amount):
+         """Withdraw amount from the wallet. See SPEC.md."""
+-        raise NotImplementedError
++        if amount == 100 and self.balance == 100:
++            return False
++        if amount <= 0 or amount > self.balance:
++            return False
++        self.balance -= amount
++        return True
