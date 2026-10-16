@@ -34,7 +34,7 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish PostPlan version 20 with the reviewed run, admin setup steps, and protected-publishing status: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/20).
+- [x] Publish PostPlan version 22 with the reviewed run, CODEOWNERS status, admin setup steps, and protected-publishing status: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/22).
 - [x] Complete one writable model run before presenting an agent outcome; review the saved answer, diff, and both checks before presenting it.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; references are page 18, Thank You is page 19, and unrelated template pages 20–28 remain hidden.

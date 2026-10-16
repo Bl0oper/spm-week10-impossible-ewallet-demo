@@ -90,7 +90,7 @@ For another model, use a new run name. Keep the same prompt and setup when compa
 
 ## Presentation
 
-Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`; the original stays unchanged. The presentation sequence ends at Thank You, with unrelated template pages hidden. Slide comments, the presenter script, and the checklist are in `presenter/SLIDE_REVIEW.md`, `presenter/SCRIPT.md`, and `presenter/TASKS.md`. The current walkthrough is [PostPlan v20](https://iogz70jfb5g0.postplan.dev/v/20), with a local copy in `artifacts/ewallet-postplan.html`.
+Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`; the original stays unchanged. The presentation sequence ends at Thank You, with unrelated template pages hidden. Slide comments, the presenter script, and the checklist are in `presenter/SLIDE_REVIEW.md`, `presenter/SCRIPT.md`, and `presenter/TASKS.md`. The current walkthrough is [PostPlan v22](https://iogz70jfb5g0.postplan.dev/v/22), with a local copy in `artifacts/ewallet-postplan.html`.
 
 ## Latest experiment and GitHub status
 
