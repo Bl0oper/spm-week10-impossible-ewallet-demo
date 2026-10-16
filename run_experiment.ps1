@@ -40,9 +40,31 @@ if (-not $runnerCommand) {
     Write-Host "The '$Runner' CLI was not found. Install and sign in to it, or use the manual steps in README.md." -ForegroundColor Red
     exit 1
 }
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host "Git was not found. Install Git from https://git-scm.com and reopen PowerShell." -ForegroundColor Red
+    exit 1
+}
 
-if (-not (Get-Command py -ErrorAction SilentlyContinue) -and -not (Get-Command python -ErrorAction SilentlyContinue)) {
+$pythonCommand = Get-Command py -ErrorAction SilentlyContinue
+if (-not $pythonCommand) {
+    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+}
+if (-not $pythonCommand) {
     Write-Host "Python was not found. Install Python 3.11+ before starting a model run." -ForegroundColor Red
+    exit 1
+}
+$pythonVersionOutput = @(& $pythonCommand.Source --version 2>&1)
+$pythonVersionExitCode = $LASTEXITCODE
+$pythonVersionText = $pythonVersionOutput -join ' '
+$pythonVersionMatch = [regex]::Match($pythonVersionText, 'Python\s+(?<major>\d+)\.(?<minor>\d+)')
+if ($pythonVersionExitCode -ne 0 -or -not $pythonVersionMatch.Success) {
+    Write-Host "Could not read the Python version from '$($pythonCommand.Name)'. Run 'py --version' or 'python --version' and fix that command before starting a model run." -ForegroundColor Red
+    exit 1
+}
+$pythonMajor = [int]$pythonVersionMatch.Groups['major'].Value
+$pythonMinor = [int]$pythonVersionMatch.Groups['minor'].Value
+if ($pythonMajor -lt 3 -or ($pythonMajor -eq 3 -and $pythonMinor -lt 11)) {
+    Write-Host "Python 3.11 or newer is required; found $pythonVersionText. Install a newer version, then reopen PowerShell." -ForegroundColor Red
     exit 1
 }
 

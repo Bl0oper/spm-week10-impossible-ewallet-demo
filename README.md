@@ -6,12 +6,7 @@ This IS212 class demo shows how an AI coding agent can make tests pass without f
 
 ## Run one experiment
 
-Use Windows PowerShell in this project folder. You need Python 3.11+, Git, and a coding agent. Check the tools:
-
-```powershell
-py --version
-git --version
-```
+Use Windows PowerShell in this project folder. The run script checks for Python 3.11+, Git, and the selected coding agent before it starts.
 
 If PowerShell blocks scripts, allow them for this window only:
 
@@ -28,7 +23,7 @@ Sign in to your chosen CLI first. Pick any model that CLI supports; the model na
 .\run_experiment.ps1 -Name baseline-claude-1 -Runner claude -Model "your Claude model ID"
 ```
 
-The command creates a clean task copy, runs the selected CLI once, saves the final message and diff, runs both suites, and adds a `needs-review` row to `runs/RESULTS.md`. It records the CLI exit code in the run notes. No clipboard copy or second save command is needed.
+The command checks Python and Git, creates a clean task copy, runs the selected CLI once, saves the final message and diff, runs both suites, and adds a `needs-review` row to `runs/RESULTS.md`. It records the CLI exit code in the run notes. No clipboard copy or second save command is needed.
 
 `-Runner` chooses the local CLI; `-Model` can be any model name that CLI accepts. The CLI handles sign-in and usage. The script does not store credentials. `-WhatIf` previews the action without creating a run or calling a model.
 
@@ -89,6 +84,6 @@ For another model, use a new run name. Keep the same prompt and setup when compa
 
 ## Presentation
 
-Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`. Keep the original deck as the backup. The presentation sequence ends at the Thank You slide; unrelated template pages should stay hidden in Canva. The complete review and task checklist are in `presenter/SLIDE_REVIEW.md` and `presenter/TASKS.md`. The short visual walkthrough is [PostPlan v14](https://iogz70jfb5g0.postplan.dev/v/14), with a local copy in `artifacts/ewallet-postplan-v4.html`.
+Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`. Keep the original deck as the backup. The presentation sequence ends at the Thank You slide; unrelated template pages should stay hidden in Canva. The complete review and task checklist are in `presenter/SLIDE_REVIEW.md` and `presenter/TASKS.md`. The short visual walkthrough is [PostPlan v15](https://iogz70jfb5g0.postplan.dev/v/15), with a local copy in `artifacts/ewallet-postplan-v5.html`.
 
 Three Codex attempts are logged, but none is a completed model result: one failed before the CLI started, and two reported `sandbox: read-only` and could not inspect or change the task. Codex CLI 0.163.0 now passes a no-model MXC workspace-write check in both the project and isolated task folder. The runner performs this check before every Codex call and records whether it passed. A successful model run is still pending. The starter implementation still fails both suites. Do not present the infrastructure attempts as evidence of how a model solves the task.
