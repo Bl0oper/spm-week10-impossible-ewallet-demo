@@ -32,9 +32,10 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [x] Publish PostPlan version 9 with the PR link and current workflow details: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/9).
 - [ ] Complete at least one real model run if the class presentation will report an agent result; use the one-command Codex or Claude Code runner.
 - [ ] Review the saved run diff and notes; replace `needs-review` only after deciding what happened.
-- [ ] Check the final Canva page order and rehearse the talk track in `presenter/SCRIPT.md`.
+- [x] Verify the copied deck's 12-page visible sequence; old slide versions and unrelated template pages remain hidden.
+- [ ] Rehearse the talk track in `presenter/SCRIPT.md` before class.
 
-The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it and check page order before presenting.
+The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it; keep any last-minute slide edits in that copy and rehearse from `SCRIPT.md`.
 
 ## GitHub publishing status
 
