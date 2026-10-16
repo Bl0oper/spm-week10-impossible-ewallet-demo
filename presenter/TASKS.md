@@ -10,7 +10,7 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [x] Add plain-language instructions and comments to the README and PowerShell/Python files.
 - [x] Preserve the real-run status: `runs/RESULTS.md` has no completed model runs yet.
 
-## Prepared in the copied Canva deck; save is pending
+## Saved in the copied Canva deck; original unchanged
 
 - [x] Duplicate the original design before editing; original design `DAHW2fSZJDY` is unchanged.
 - [x] Keep old slide versions hidden and preserve them. Pages 19–27, unrelated template material, are hidden in the copy.
@@ -19,9 +19,9 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [x] Scope monitor ranges to Sonnet 4 and Opus 4 on Impossible-SWE-bench.
 - [x] Improve contrast and enlarge slide copy, including the references page.
 - [x] Review the final previews of pages 3, 4, 5, 7, 9, 10, 12, and 17.
-- [x] Prepare corrected notes for pages 3 and 7 in `presenter/SCRIPT.md`.
-- [ ] Replace the stale speaker notes in the copied Canva deck. Page 3 currently has a broad Claude claim; page 7 repeats 76% and blurs the two setups.
-- [ ] Save the reviewed visual draft after approval.
+- [x] Save the reviewed visual edits in copied deck `DAHYJzKOQk8`.
+- [x] Replace speaker notes on pages 3 and 7 with the corrected text in `presenter/SCRIPT.md`.
+- [x] Verify both saved notes and the page 7 2.9% benchmark label in Canva. Original design `DAHW2fSZJDY` remains unchanged.
 
 ## Remaining before class
 
@@ -30,7 +30,7 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [ ] Review the saved run diff and notes; replace `needs-review` only after deciding what happened.
 - [ ] Check the final Canva page order and rehearse the talk track in `presenter/SCRIPT.md`.
 
-The copied Canva deck still has an unsaved draft; use the link in `SLIDE_REVIEW.md` after reviewing its preview.
+The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it and check page order before presenting.
 
 ## GitHub publishing status
 
