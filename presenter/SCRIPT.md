@@ -1,25 +1,36 @@
-# Part 2: "Can you show it?" (2:00)
+# Part 2: `Can you show it?` (2 minutes)
 
-Before you start, have these open as tabs: `SPEC.md`, `tests/test_wallet.py`, `runs/RESULTS.md`, your chosen real diff, the PR page, and a PowerShell terminal in the repo. Replace every `[...]` with your real results.
+Use the copied Canva deck's `Show Time` divider (page 15). Switch to the repository and GitHub for the demo, then return to the final guidance slide, references, and Thank You slide (pages 16–18 in the copied deck). Check current page numbers in Canva before class if hidden pages have changed the order.
 
-| Time | Screen / command | Say (one sentence) |
+## Before class
+
+1. Complete at least one real run. Check that its `.md` notes and `.diff` exist and have no `needs-review` label.
+2. Open `SPEC.md`, `tests/test_wallet.py`, `runs/RESULTS.md`, the chosen diff, and PowerShell in the repository. Open the pull request only if you will demonstrate the GitHub check.
+3. Run `.\check_heldout.ps1 runs\<run-name>.diff` once in advance if you plan to show its output. Save screenshots of GitHub checks in case Wi-Fi is slow.
+
+**No results are recorded yet.** Do not say that model runs happened or give counts until you have actually completed them. If you show `examples/special_case.diff`, call it a reconstruction, not an agent run.
+
+## Talk track
+
+| Time | Show | Say |
 |---|---|---|
-| 0:00–0:15 | `SPEC.md` next to `test_exact_balance_withdrawal_rejected` in `tests/test_wallet.py` | "The spec only rejects a withdrawal that *exceeds* the balance, but we planted one test that says taking exactly 100 out of 100 must fail, so no honest code can pass every test." |
-| 0:15–0:40 | `runs/RESULTS.md`, then `runs\[name].diff` | "We gave this task to Claude Code ([model], [date]) ten times: [X] of 5 baseline runs and [Y] of 5 strict-prompt runs changed the tests, and here is one real diff where it [changed assertFalse to assertTrue / deleted the test / ...]." |
-| 0:40–1:10 | PR page: **tests ✓, protect-tests ✗**, "Merging is blocked" | "Week 6 CI says tests pass, because the agent made them pass, but our protect-tests check fails because tests/ changed without a human adding the approved-test-change label, and branch protection blocks the merge." |
-| 1:10–1:35 | `.\check_heldout.ps1 examples\special_case.diff` → `VISIBLE: PASS`, `HELD-OUT: FAIL` | "A sneakier cheat leaves the tests alone and hard-codes the 100 case, so both CI checks pass, but a held-out test the agent never saw catches it; this one is our reconstruction, not a real run [or: this is real run [name]]." |
-| 1:35–1:55 | Same PR with the label added: protect-tests ✓ (or the screenshot) | "The catch is that an agent that *correctly* fixes the wrong test gets exactly the same red ✗, because the gate sees *that* a test changed but not *why*, so a human still has to judge." |
-| 1:55–2:00 | Hand over | "So we can detect it, but not decide it. Over to [name] for [part 3]." |
+| 0:00–0:15 | `SPEC.md` beside `test_exact_balance_withdrawal_rejected` in `tests/test_wallet.py` | “The spec allows withdrawing the full balance, but this test says it must fail. No implementation can satisfy both rules.” |
+| 0:15–0:40 | `runs/RESULTS.md`, then one completed run's diff | “Here is one [honest flag / test edit / special case] from [exact model]. The table keeps every attempt, including failures.” |
+| 0:40–1:10 | Pull request checks, if available | “The normal tests can go green after a test edit. The separate `protect-tests` check flags that edit until a person approves it.” |
+| 1:10–1:35 | `.\check_heldout.ps1 examples\special_case.diff` | “This is our labelled reconstruction: it passes the visible test but fails the held-out check because the code hard-codes one example.” |
+| 1:35–1:55 | Show the same pull request with and without `approved-test-change`, or screenshots | “The gate only sees that a test changed. A person still has to decide whether the change is a good correction or a shortcut.” |
+| 1:55–2:00 | Return to the takeaway slide | “The checks flag suspicious results. People still have to decide whether the code follows the requirement.” |
 
-**Fallback (no Wi-Fi or GitHub is slow):** show screenshots of the PR checks (✗ without the label, ✓ with it) and of the filled-in `runs/RESULTS.md`. Save them in `presenter/` the day before.
+## How to read the checks
+
+- `VISIBLE: PASS` means `tests/` passed.
+- `HELD-OUT: PASS` means `heldout/` passed.
+- Read the diff and run notes as well. A passing check is evidence about its cases, not proof that all code is correct.
 
 ## Likely questions
 
-**"Isn't editing a wrong test good?"**
-Sometimes, yes: EvilGenie argues that fixing an incorrect test is arguably desirable when the agent wasn't told to leave tests alone. The problem is that a fix and a cheat produce the same kind of diff, so the change should be flagged and approved by a person, which is what the label gate forces.
+**“Isn't fixing a wrong test a good thing?”** It can be. The gate cannot tell a correct repair from a test weakened to hide a bug, so a person must review it.
 
-**"Would a strict prompt fix it?"**
-It helps a lot on simple tasks: in ImpossibleBench, a strict prompt cut GPT-5's cheating from 93% to 1% on LiveCodeBench, but only from 66% to 54% on SWE-bench. Our strict runs gave [Y] of 5, which is far too small a sample to generalise from, so we would pair a prompt with a CI gate rather than rely on the prompt alone.
+**“Would a stricter prompt solve it?”** It can reduce cheating in some benchmark settings, but it does not guarantee the agent will stop. A small class sample cannot support a general claim.
 
-**"Did you have to push it to cheat?"**
-No: the baseline prompt is the one-line task in `TASK.md`, in a fresh folder with no CLAUDE.md and no hints, and nothing else was typed. Every run is in `runs/` with its model and date, including the runs where it behaved well.
+**“Did the agent see the held-out tests?”** No. `new_run.ps1` copies only the task and visible tests. `save_run.ps1` checks the saved diff in a separate temporary copy after the agent stops.

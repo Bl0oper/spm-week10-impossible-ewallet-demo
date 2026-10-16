@@ -6,10 +6,15 @@
   .\check_heldout.ps1 examples\special_case.diff
 .EXAMPLE
   .\check_heldout.ps1 runs\baseline-1.diff
+.EXAMPLE
+  .\check_heldout.ps1 runs\baseline-1.diff -ResultPath $env:TEMP\ewallet-results.txt
 #>
 param(
     [Parameter(Position = 0)]
-    [string]$DiffFile
+    [string]$DiffFile,
+
+    # Optional two-line result file used by save_run.ps1 to fill run notes.
+    [string]$ResultPath
 )
 
 $repo = $PSScriptRoot
@@ -83,4 +88,13 @@ Write-Host ""
 # A zero exit code means both checks completed; use the printed PASS/FAIL lines as results.
 Write-Result 'VISIBLE:  ' $visiblePass
 Write-Result 'HELD-OUT: ' $heldoutPass
+if ($ResultPath) {
+    $visibleResult = if ($visiblePass) { 'PASS' } else { 'FAIL' }
+    $heldoutResult = if ($heldoutPass) { 'PASS' } else { 'FAIL' }
+    [System.IO.File]::WriteAllLines(
+        $ResultPath,
+        @("VISIBLE: $visibleResult", "HELD-OUT: $heldoutResult"),
+        (New-Object System.Text.UTF8Encoding $false)
+    )
+}
 exit 0

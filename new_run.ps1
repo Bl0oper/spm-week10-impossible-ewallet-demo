@@ -2,12 +2,17 @@
 .SYNOPSIS
   Make a fresh, clean copy of the task for one agent run and open it in VS Code.
 .EXAMPLE
-  .\new_run.ps1 -Name baseline-1
+  .\new_run.ps1 -Name baseline-gpt5-1 -Model "GPT-5"
+.EXAMPLE
+  .\new_run.ps1 -Name strict-claude-opus-1 -Model "Claude Opus 4.6"
 #>
 param(
     [Parameter(Mandatory = $true)]
-    [ValidatePattern('^(baseline|strict)-[0-9]+$')]
-    [string]$Name
+    [ValidatePattern('^(baseline|strict)(-[A-Za-z0-9._]+)*-[0-9]+$')]
+    [string]$Name,
+
+    # Free-text metadata only. The scripts do not limit or launch any model.
+    [string]$Model = ''
 )
 
 # Use an opaque folder name so the run label does not hint which prompt the agent got.
@@ -18,9 +23,18 @@ function Get-RunDir([string]$RunName) {
     Join-Path $env:TEMP "ewallet-$hex"
 }
 
+# Keep run metadata outside the task folder so the agent cannot see it.
+function Get-RunMetadataPath([string]$RunName) {
+    $sha = [System.Security.Cryptography.SHA1]::Create()
+    $bytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($RunName))
+    $hex = -join ($bytes[0..3] | ForEach-Object { $_.ToString('x2') })
+    Join-Path $env:TEMP "ewallet-$hex.json"
+}
+
 # Anchor file paths to this repo even if PowerShell was opened in another folder.
 $repo = $PSScriptRoot
 $runDir = Get-RunDir $Name
+$metadataPath = Get-RunMetadataPath $Name
 $kind = $Name.Split('-')[0]
 $promptFile = Join-Path $repo "prompts\$kind.md"
 
@@ -41,14 +55,26 @@ foreach ($item in 'SPEC.md', 'TASK.md', 'ewallet', 'tests') {
 }
 Get-ChildItem -Path $runDir -Recurse -Directory -Filter '__pycache__' | Remove-Item -Recurse -Force
 
+$metadata = [ordered]@{
+    name = $Name
+    kind = $kind
+    model = $Model
+    started = (Get-Date).ToString('o')
+}
+[System.IO.File]::WriteAllText(
+    $metadataPath,
+    ($metadata | ConvertTo-Json),
+    (New-Object System.Text.UTF8Encoding $false)
+)
+
 Push-Location $runDir
 try {
     # Keep a clean starting commit so save_run.ps1 can capture all later changes.
     git init -q -b main
     git config core.autocrlf true
     git config core.safecrlf false
-    # Keep Python caches and Claude Code settings out of the saved diff.
-    Set-Content -Path '.git\info\exclude' -Value @('__pycache__/', '*.pyc', '.claude/') -Encoding Ascii
+    # Keep Python caches and local agent settings out of the saved diff.
+    Set-Content -Path '.git\info\exclude' -Value @('__pycache__/', '*.pyc', '.claude/', '.codex/', '.opencode/') -Encoding Ascii
     git add -A
     git -c user.name=run -c user.email=run@localhost commit -q -m "initial"
     if ($LASTEXITCODE -ne 0) {
@@ -77,6 +103,8 @@ else {
 
 Write-Host ""
 Write-Host "Run folder : $runDir"
+if ($Model) { Write-Host "Model      : $Model" }
+else { Write-Host "Model      : not set yet (use -Model or add it to the run notes)" -ForegroundColor Yellow }
 if ($copied) {
     Write-Host "Prompt     : prompts\$kind.md  (already copied to your clipboard)" -ForegroundColor Green
 }
@@ -85,7 +113,7 @@ else {
 }
 Write-Host ""
 Write-Host "Next:"
-Write-Host "  1. In the NEW VS Code window, open Claude Code and start a new conversation."
+Write-Host "  1. In the NEW VS Code window, open your coding agent and start a fresh conversation."
 Write-Host "  2. Paste the prompt (Ctrl+V) and send it. Do not type anything else."
 Write-Host "  3. When the agent stops, copy its final message, then run here:"
 Write-Host "       .\save_run.ps1 -Name $Name"
