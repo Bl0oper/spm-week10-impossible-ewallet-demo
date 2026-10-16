@@ -33,8 +33,8 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish PostPlan version 15 with the saved Canva citation, current 28-page map, run status, and simpler prerequisite instructions: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/15).
-- [ ] Complete one writable model run before presenting an agent outcome. The no-model MXC preflight now passes in the project and isolated task folder; run the Codex command from a fresh PowerShell window, then review the saved answer, diff, and both checks before presenting it.
+- [x] Publish PostPlan version 16 with the saved Canva citation, current 28-page map, run status, and the Codex fresh-PowerShell step first: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/16).
+- [ ] Complete one writable model run before presenting an agent outcome. From the separate PowerShell window, run `.\run_experiment.ps1 -Name baseline-gpt-4 -Runner codex -Model gpt-6-luna`, then review the saved answer, diff, and both checks before presenting it.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; references are page 18, Thank You is page 19, and unrelated template pages 20–28 remain hidden.
 - [ ] Rehearse the talk track in `presenter/SCRIPT.md` before class.

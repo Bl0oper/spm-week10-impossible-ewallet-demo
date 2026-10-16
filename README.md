@@ -6,7 +6,13 @@ This IS212 class demo shows how an AI coding agent can make tests pass without f
 
 ## Run one experiment
 
-Use Windows PowerShell in this project folder. The run script checks for Python 3.11+, Git, and the selected coding agent before it starts.
+Open Windows PowerShell from the Start menu. For a Codex run, use a separate PowerShell window outside any Codex session. Go to the project folder:
+
+```powershell
+cd "$env:USERPROFILE\Projects\spm-week10-impossible-ewallet-demo"
+```
+
+The run script checks for Python 3.11+, Git, and the selected coding agent before it starts.
 
 If PowerShell blocks scripts, allow them for this window only:
 
@@ -16,7 +22,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 ### Fast path: one command with Codex or Claude Code
 
-Sign in to your chosen CLI first. Pick any model that CLI supports; the model name is passed through as free text with no allow-list. Run exactly one command per experiment, and give every experiment a new name.
+Sign in to your chosen CLI first. Pick any model that CLI supports; the model name is passed through as free text with no allow-list. Run exactly one command per experiment, and give every experiment a new name. The script name starts with `run`: type `.\run_experiment.ps1` exactly.
 
 ```powershell
 .\run_experiment.ps1 -Name baseline-gpt-1 -Runner codex -Model "your GPT model ID"
@@ -29,7 +35,7 @@ The command checks Python and Git, creates a clean task copy, runs the selected 
 
 Before Codex uses quota, the script runs a local MXC sandbox check and writes a scratch file inside the isolated task folder. It does not call a model. If that write check fails, the attempt is saved as an environment failure and Codex is not started. When it passes, Codex runs with the same MXC sandbox and `workspace-write` permissions. The script uses the Windows sandbox supported by Codex CLI 0.162.0 and newer; update Codex if the check says the command or MXC mode is unavailable. Claude Code runs in safe mode, without project/user customizations, MCP tools, or saved session history. Both use the CLI's existing sign-in; a run may use your account quota.
 
-Open Windows PowerShell from the Start menu for a Codex run; do not start this script from inside another Codex session. A nested Codex can inherit the parent session's read-only policy, so the script stops before creating a run or calling the model when it detects that context. After Codex starts, confirm its summary says `sandbox: workspace-write`. If it says `read-only`, keep the failed attempt in the log, but do not treat it as a model result.
+A nested Codex can inherit the parent session's read-only policy, so the script stops before creating a run or calling the model when it detects that context. After Codex starts, confirm its summary says `sandbox: workspace-write`. If it says `read-only`, keep the failed attempt in the log, but do not treat it as a model result.
 
 ### Manual route: any other coding agent
 
@@ -84,6 +90,6 @@ For another model, use a new run name. Keep the same prompt and setup when compa
 
 ## Presentation
 
-Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`. Keep the original deck as the backup. The presentation sequence ends at the Thank You slide; unrelated template pages should stay hidden in Canva. The complete review and task checklist are in `presenter/SLIDE_REVIEW.md` and `presenter/TASKS.md`. The short visual walkthrough is [PostPlan v15](https://iogz70jfb5g0.postplan.dev/v/15), with a local copy in `artifacts/ewallet-postplan-v5.html`.
+Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`. Keep the original deck as the backup. The presentation sequence ends at the Thank You slide; unrelated template pages should stay hidden in Canva. The complete review and task checklist are in `presenter/SLIDE_REVIEW.md` and `presenter/TASKS.md`. The short visual walkthrough is [PostPlan v16](https://iogz70jfb5g0.postplan.dev/v/16), with a local copy in `artifacts/ewallet-postplan-v6.html`.
 
 Three Codex attempts are logged, but none is a completed model result: one failed before the CLI started, and two reported `sandbox: read-only` and could not inspect or change the task. Codex CLI 0.163.0 now passes a no-model MXC workspace-write check in both the project and isolated task folder. The runner performs this check before every Codex call and records whether it passed. A successful model run is still pending. The starter implementation still fails both suites. Do not present the infrastructure attempts as evidence of how a model solves the task.
