@@ -95,6 +95,57 @@ if (-not (Test-Path (Join-Path $runDir '.git'))) {
     exit 1
 }
 
+# Verify Codex can actually write to this isolated folder before spending quota.
+# The sandbox probe runs a local command only; it does not call a model.
+$workspacePreflight = 'not applicable (Claude Code runner)'
+if ($Runner -eq 'codex') {
+    $probeName = '.codex-write-check.txt'
+    $probePath = Join-Path $runDir $probeName
+    $probeArgs = @(
+        '-c', 'windows.sandbox=mxc',
+        'sandbox',
+        '--include-managed-config',
+        '--permission-profile', ':workspace',
+        '--', 'cmd.exe', '/d', '/c', "echo CODEX_WORKSPACE_WRITE_OK>$probeName"
+    )
+    $probeOutput = @()
+    $probeExitCode = 1
+    Push-Location $runDir
+    try {
+        $probeOutput = @(& $runnerCommand.Path @probeArgs 2>&1)
+        $probeExitCode = $LASTEXITCODE
+    }
+    catch {
+        $probeOutput = @($_.Exception.Message)
+    }
+    finally {
+        Pop-Location
+    }
+
+    $probePassed = $false
+    if ($probeExitCode -eq 0 -and (Test-Path -LiteralPath $probePath)) {
+        $probePassed = (Get-Content -Raw -LiteralPath $probePath).Trim() -eq 'CODEX_WORKSPACE_WRITE_OK'
+    }
+    if (Test-Path -LiteralPath $probePath) {
+        Remove-Item -LiteralPath $probePath
+    }
+
+    if (-not $probePassed) {
+        $workspacePreflight = 'failed (model not started)'
+        $probeDetails = ($probeOutput | ForEach-Object { [string]$_ }) -join ' '
+        if ([string]::IsNullOrWhiteSpace($probeDetails)) {
+            $probeDetails = "sandbox command exit code: $probeExitCode; write check file was not created"
+        }
+        $message = "Codex was not started because the no-model MXC workspace-write preflight failed. Update Codex or fix the Windows sandbox, then use a new run name. Preflight output: $probeDetails"
+        Write-Host $message -ForegroundColor Yellow
+        & (Join-Path $PSScriptRoot 'save_run.ps1') -Name $Name -Runner $Runner -Model $Model -FinalMessage $message -AgentExitCode 'not started; sandbox preflight failed' -SandboxPreflight $workspacePreflight
+        exit 1
+    }
+
+    $workspacePreflight = 'passed (MXC sandbox wrote inside the isolated task folder)'
+    Write-Host 'Codex sandbox preflight: PASS. No model was used for this check.' -ForegroundColor Green
+}
+
 $promptText = [System.IO.File]::ReadAllText($promptPath)
 $agentExitCode = 1
 $agentFailure = ''
@@ -104,6 +155,7 @@ Push-Location $runDir
 try {
     if ($Runner -eq 'codex') {
         $codexArgs = @(
+            '-c', 'windows.sandbox=mxc',
             'exec',
             '--model', $Model,
             '--sandbox', 'workspace-write',
@@ -160,7 +212,7 @@ if ($answerMissing -or $answerEmpty) {
 }
 
 # save_run stores the final message, diff, run label, and both check results.
-& (Join-Path $PSScriptRoot 'save_run.ps1') -Name $Name -Runner $Runner -Model $Model -FinalMessageFile $answerPath -AgentExitCode ([string]$agentExitCode)
+& (Join-Path $PSScriptRoot 'save_run.ps1') -Name $Name -Runner $Runner -Model $Model -FinalMessageFile $answerPath -AgentExitCode ([string]$agentExitCode) -SandboxPreflight $workspacePreflight
 
 $notesPath = Join-Path $PSScriptRoot "runs\$Name.md"
 if (-not (Test-Path $notesPath)) {

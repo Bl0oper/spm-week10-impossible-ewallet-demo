@@ -15,7 +15,8 @@ param(
     [string]$Runner = '',
     [string]$FinalMessage = '',
     [string]$FinalMessageFile = '',
-    [string]$AgentExitCode = ''
+    [string]$AgentExitCode = '',
+    [string]$SandboxPreflight = ''
 )
 
 # Use the same folder-name recipe as new_run.ps1 to find that exact run.
@@ -128,6 +129,7 @@ else {
         "- Model: $(if ($savedModel) { $savedModel } else { 'not recorded' })",
         "- Started: $started",
         "- Agent CLI exit code: $(if ($AgentExitCode) { $AgentExitCode } else { 'not recorded' })",
+        "- Workspace preflight: $(if ($SandboxPreflight) { $SandboxPreflight } else { 'not recorded (manual run)' })",
         "- Label: needs-review (inspect the diff, then choose a label)",
         "- Diff: runs/$Name.diff",
         "- tests/ changed (auto): $testsText",
