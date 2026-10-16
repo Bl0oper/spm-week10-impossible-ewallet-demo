@@ -2,11 +2,15 @@
 
 Updated 16 October 2026. This is the short handoff list; see the linked files for details.
 
-## Completed and pushed to `main`
+## Implemented in the current PR branch
 
-- [x] Make one isolated run with `new_run.ps1` and save/check/record it with one `save_run.ps1` command.
-- [x] Record any GPT or Claude model name as free text. The scripts do not select a provider, log in, or start a model.
+- [x] Add a one-command run path for the local Codex or Claude Code CLI; pass model names through as free text without an allow-list.
+- [x] Keep a manual fallback for any other coding agent; the scripts do not store provider credentials.
 - [x] Keep visible and held-out checks separate, preserve every run, and leave the result label at `needs-review` until a person reviews the diff.
+- [x] Check the PowerShell syntax and both `-WhatIf` paths without calling a model.
+
+## Previously completed and pushed to `main`
+
 - [x] Add plain-language instructions and comments to the README and PowerShell/Python files.
 - [x] Preserve the real-run status: `runs/RESULTS.md` has no completed model runs yet.
 
@@ -25,7 +29,7 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish the refreshed PostPlan: [open the current guide](https://iogz70jfb5g0.postplan.dev).
+- [ ] Publish the refreshed PostPlan after the one-command CLI instructions are finalized: [open the current guide](https://iogz70jfb5g0.postplan.dev).
 - [ ] Complete at least one real model run if the class presentation will report an agent result. The scripts prepare and check a run but do not launch GPT or Claude.
 - [ ] Review the saved run diff and notes; replace `needs-review` only after deciding what happened.
 - [ ] Check the final Canva page order and rehearse the talk track in `presenter/SCRIPT.md`.
@@ -34,10 +38,11 @@ The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it and che
 
 ## GitHub publishing status
 
-- The requested checkpoints are pushed to `main`; use `git log -1` to see the current SHA.
+- The copied-slide and earlier guide checkpoints are on `main` at `6f2fbc0`. The new one-command CLI workflow is on branch `codex/one-command-agent-runs` and still needs its pull request.
 - `.github/CODEOWNERS` assigns owners to `/tests/` and `/.github/` changes, including the reviewer added for this project.
 - The connected GitHub account has push access but not admin access. Its branch-protection query returned 404, so the current connection cannot verify the branch rules.
 - Direct pushes to `main` succeeded. `protect-tests` only runs on pull requests, so it did not gate these pushes. The visible `tests` workflow is red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
+- Publish the Codex/Claude CLI changes through a pull request and wait for code-owner review; add the PR link and check status here.
 - [ ] A repository admin must verify or enable pull-request and code-owner review requirements before we can claim `main` is protected. Choose required checks carefully because the baseline wallet task is intentionally unfinished.
 
 ## References and handoff

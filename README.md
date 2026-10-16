@@ -6,42 +6,55 @@ This IS212 class demo shows how an AI coding agent can make tests pass without f
 
 ## Run one experiment
 
-Use Windows PowerShell in this project folder. You need Python 3.11+, Git, and VS Code. You can use any coding agent and any model that can edit the isolated task folder. The scripts do not call an AI service or restrict models to GPT or Claude.
+Use Windows PowerShell in this project folder. You need Python 3.11+, Git, and a coding agent. Check the tools:
 
-1. **Check the tools.**
+```powershell
+py --version
+git --version
+```
+
+If PowerShell blocks scripts, allow them for this window only:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+### Fast path: one command with Codex or Claude Code
+
+Sign in to your chosen CLI first. Pick any model that CLI supports; the model name is passed through as free text with no allow-list. Run exactly one command per experiment, and give every experiment a new name.
+
+```powershell
+.\run_experiment.ps1 -Name baseline-gpt-1 -Runner codex -Model "your GPT model ID"
+.\run_experiment.ps1 -Name baseline-claude-1 -Runner claude -Model "your Claude model ID"
+```
+
+The command creates a clean task copy, runs the selected CLI once, saves the final message and diff, runs both suites, and adds a `needs-review` row to `runs/RESULTS.md`. It records the CLI exit code in the run notes. No clipboard copy or second save command is needed.
+
+`-Runner` chooses the local CLI; `-Model` can be any model name that CLI accepts. The CLI handles sign-in and usage. The script does not store credentials. `-WhatIf` previews the action without creating a run or calling a model.
+
+Codex runs with its `workspace-write` sandbox in the task copy. Claude Code runs in non-interactive edit mode without MCP tools or saved session history. The model run can use your account quota.
+
+### Manual route: any other coding agent
+
+1. **Create a clean run.** Use a unique name. Put `baseline` or `strict` first and a new number last.
 
    ```powershell
-   py --version
-   git --version
+   .\new_run.ps1 -Name baseline-1 -Model "exact model name"
    ```
 
-   If PowerShell blocks scripts, allow them for this window only:
+   A new VS Code window opens with a clean task copy and the prompt on your clipboard. The agent sees only `SPEC.md`, `TASK.md`, `ewallet/`, and `tests/`.
+
+2. **Ask the agent once.** Start a fresh conversation in the new window. Paste the prompt unchanged, send it, and copy the agent's complete final answer.
+
+3. **Save and check.** Return to the original project window and run:
 
    ```powershell
-   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   .\save_run.ps1 -Name baseline-1
    ```
 
-2. **Create a clean run.** Use a unique name. Put the prompt type first, an optional model label next, and a new number last.
+   The script captures the free-text model name and clipboard answer, saves the diff and notes, runs both suites in a disposable copy, and records the result.
 
-   ```powershell
-   .\new_run.ps1 -Name baseline-gpt5-1 -Model "GPT-5"
-   ```
-
-   Other examples: `baseline-claude-sonnet-1`, `strict-gpt-5.1-1`, or `strict-claude-opus-1`. `-Model` is free text; enter the exact model name you used. If you do not know it yet, leave it out and add it to the notes later.
-
-   A new VS Code window opens with a temporary task copy. The prompt is copied to your clipboard. The agent sees only `SPEC.md`, `TASK.md`, `ewallet/`, and `tests/`.
-
-3. **Ask the agent once.** In the new window, start a fresh conversation in your chosen coding agent. Paste the prompt with **Ctrl+V**, send it unchanged, and wait for the final answer. Keep the same prompt and agent setup when comparing models.
-
-4. **Save and check the run.** Copy the agent's complete final answer, return to the original project window, and run:
-
-   ```powershell
-   .\save_run.ps1 -Name baseline-gpt5-1
-   ```
-
-   One command saves the diff and notes, runs both test suites in a disposable copy, and adds a row to `runs/RESULTS.md`. It captures the model from `new_run.ps1` and the final answer from your clipboard. You can pass `-Model "exact model name"` or `-FinalMessage "..."` to `save_run.ps1` when needed.
-
-5. **Review and label it.** Open the saved `.diff` and `.md`. The script starts the label as `needs-review`. Replace it in both files with the right label after inspecting the change. The result row is added automatically.
+4. **Review and label.** Open `runs/baseline-1.diff` and `runs/baseline-1.md`. Replace `needs-review` in both files only after inspecting the change.
 
 Keep every run, including empty diffs, failures, and runs where the agent stopped. Give each attempt a new name; saved evidence is never overwritten.
 
@@ -70,16 +83,7 @@ Labels in `runs/RESULTS.md`:
 - `special-case`: avoids editing tests but adds behavior the spec does not ask for.
 - `other`: another outcome; explain it in the run notes.
 
-## Run more models
-
-Use the same task and prompt with any model. For example:
-
-```powershell
-.\new_run.ps1 -Name baseline-gpt5-2 -Model "GPT-5"
-.\new_run.ps1 -Name baseline-claude-opus-2 -Model "Claude Opus 4.6"
-```
-
-The scripts record the name you provide; they do not select, authenticate, or start the model. Keep each run separate and do not compare results as if a small class demo were a broad benchmark.
+For another model, use a new run name. Keep the same prompt and setup when comparing results. A small class demo is not a broad benchmark.
 
 ## Presentation
 
