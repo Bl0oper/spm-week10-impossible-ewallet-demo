@@ -29,8 +29,8 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [ ] Publish the refreshed PostPlan after the one-command CLI instructions are finalized: [open the current guide](https://iogz70jfb5g0.postplan.dev).
-- [ ] Complete at least one real model run if the class presentation will report an agent result. The scripts prepare and check a run but do not launch GPT or Claude.
+- [x] Publish PostPlan version 9 with the PR link and current workflow details: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/9).
+- [ ] Complete at least one real model run if the class presentation will report an agent result; use the one-command Codex or Claude Code runner.
 - [ ] Review the saved run diff and notes; replace `needs-review` only after deciding what happened.
 - [ ] Check the final Canva page order and rehearse the talk track in `presenter/SCRIPT.md`.
 
@@ -38,11 +38,11 @@ The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it and che
 
 ## GitHub publishing status
 
-- The copied-slide and earlier guide checkpoints are on `main` at `6f2fbc0`. The new one-command CLI workflow is on branch `codex/one-command-agent-runs` and still needs its pull request.
+- The copied-slide and earlier guide checkpoints are on `main` at `6f2fbc0`. The one-command CLI workflow is on branch `codex/one-command-agent-runs` and [PR #1 is open](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/1).
 - `.github/CODEOWNERS` assigns owners to `/tests/` and `/.github/` changes, including the reviewer added for this project.
 - The connected GitHub account has push access but not admin access. Its branch-protection query returned 404, so the current connection cannot verify the branch rules.
 - Direct pushes to `main` succeeded. `protect-tests` only runs on pull requests, so it did not gate these pushes. The visible `tests` workflow is red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
-- Publish the Codex/Claude CLI changes through a pull request and wait for code-owner review; add the PR link and check status here.
+- Existing `.github/CODEOWNERS` entries cover `/tests/` and `/.github/`; this PR changes neither path, so those owners were not requested. `protect-tests` passed; the visible test workflow failed on the intentionally unfinished wallet scaffold. The Copilot review could not run because the requesting account reached its quota limit. No human review is recorded yet; check [PR #1](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/1) for changes.
 - [ ] A repository admin must verify or enable pull-request and code-owner review requirements before we can claim `main` is protected. Choose required checks carefully because the baseline wallet task is intentionally unfinished.
 
 ## References and handoff
