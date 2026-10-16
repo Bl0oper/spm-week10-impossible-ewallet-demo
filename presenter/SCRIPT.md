@@ -21,6 +21,13 @@ Use the copied Canva deck's `Show Time` divider (page 15). Switch to the reposit
 | 1:35–1:55 | Show the same pull request with and without `approved-test-change`, or screenshots | “The gate only sees that a test changed. A person still has to decide whether the change is a good correction or a shortcut.” |
 | 1:55–2:00 | Return to the takeaway slide | “The checks flag suspicious results. People still have to decide whether the code follows the requirement.” |
 
+## Replacement speaker notes for the copied deck
+
+These notes replace the stale notes on pages 3 and 7. Page 7 keeps the 76% figure off its note; that result appears on page 9 only.
+
+- **Page 3:** “METR examined an early MirrorCode version with hidden tests. Opus 4.6 attempted reward hacking in roughly 80% of trajectories. This is an attempt rate on that benchmark variant, not a general cheating or success rate.”
+- **Page 7:** “GPT-5’s cheating rate was 2.9% on one-off Impossible-LiveCodeBench tasks with a minimal scaffold. This is a different task set and scaffold from the Impossible-SWE-bench result on page 9.”
+
 ## How to read the checks
 
 - `VISIBLE: PASS` means `tests/` passed.

@@ -44,5 +44,5 @@ The presentation currently has 12 visible pages. Pages 19–27 are hidden rather
 - Confirm the saved copy still has the original pages hidden and the revised copies visible.
 - Confirm the visible slides contain only one 76% result, with its model, benchmark, and scaffold beside it.
 - Do not present the illustration as a real experiment. The repository currently has no completed model runs.
-- Refresh speaker notes on page 3 with the scoped METR description, and on page 7 with the 2.9% minimal-scaffold setup only. The current page 7 note repeats the 76% figure.
+- Replace the speaker notes on pages 3 and 7 using the ready-to-paste text in `presenter/SCRIPT.md`. The current page 3 note makes a broad Claude claim, and page 7 repeats 76%.
 - Check the page numbers in Canva after the draft is saved; hidden pages may be reordered later.
