@@ -8,7 +8,7 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [x] Keep a manual fallback for any other coding agent; the scripts do not store provider credentials.
 - [x] Keep visible and held-out checks separate, preserve every run, and leave the result label at `needs-review` until a person reviews the diff.
 - [x] Check the PowerShell syntax and both `-WhatIf` paths without calling a model.
-- [x] Make one Codex/GPT attempt with the signed-in `gpt-6-luna` CLI, preserve the failed launch and read-only attempts, and record the exact suite results.
+- [x] Make three Codex/GPT attempts with the signed-in `gpt-6-luna` CLI and preserve the evidence. The launcher failure and both read-only runs are infrastructure failures, not model results.
 - [x] Stop a nested Codex run before it consumes quota when this PowerShell inherits a Codex session ID; document the independent PowerShell launch path.
 
 ## Previously completed and pushed to `main`
@@ -31,8 +31,8 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish PostPlan version 11 with the PR link and independent PowerShell instructions: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/11).
-- [ ] Complete one writable model run before presenting an agent outcome. Open Windows PowerShell from Start, outside this Codex session; the two logged attempts are not evidence about model behavior.
+- [x] Publish PostPlan version 12 with the third read-only attempt and current run status: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/12).
+- [ ] Complete one writable model run before presenting an agent outcome. The third attempt also reported `sandbox: read-only` even though the launcher requested `workspace-write`; the reason is unknown. Do not spend quota on another run until the effective CLI permissions are confirmed.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; old slide versions and unrelated template pages remain hidden.
 - [ ] Rehearse the talk track in `presenter/SCRIPT.md` before class.

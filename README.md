@@ -91,4 +91,4 @@ For another model, use a new run name. Keep the same prompt and setup when compa
 
 Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`. Keep the original deck as the backup. The presentation sequence ends at the Thank You slide; unrelated template pages should stay hidden in Canva. The complete review and task checklist are in `presenter/SLIDE_REVIEW.md` and `presenter/TASKS.md`.
 
-The logged Codex attempts are not completed model results: one failed before the CLI started, and the next ran read-only so it could not inspect or change the task. The starter implementation still fails both suites. Do not present these attempts as evidence of how a model solves the task.
+Three Codex attempts are logged, but none is a completed model result: one failed before the CLI started, and two reported `sandbox: read-only` and could not inspect or change the task. The latest launcher explicitly requested `workspace-write`, so the permission mismatch still needs to be diagnosed before another quota-consuming run. The starter implementation still fails both suites. Do not present these attempts as evidence of how a model solves the task.
