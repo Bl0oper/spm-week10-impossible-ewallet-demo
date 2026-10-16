@@ -24,6 +24,7 @@ Please reopen the workspace with write access enabled; then I can implement with
 
 - The launcher requested `--sandbox workspace-write`, but the Codex startup summary reported `sandbox: read-only`.
 - The cause of that mismatch is not established. Codex could not list or inspect the task files, so this is not evidence of model task performance.
+- An [open Codex CLI issue](https://github.com/openai/codex/issues/34961) reports the same requested-versus-effective sandbox mismatch on Windows; it does not confirm the cause on this machine.
 - CLI token usage reported: 19,461.
 
 ## Automated check results

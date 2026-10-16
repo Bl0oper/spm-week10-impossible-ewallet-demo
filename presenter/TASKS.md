@@ -31,8 +31,8 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish PostPlan version 12 with the third read-only attempt and current run status: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/12).
-- [ ] Complete one writable model run before presenting an agent outcome. The third attempt also reported `sandbox: read-only` even though the launcher requested `workspace-write`; the reason is unknown. Do not spend quota on another run until the effective CLI permissions are confirmed.
+- [x] Publish PostPlan version 13 with the third read-only attempt, current run status, and matching upstream report: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/13).
+- [ ] Complete one writable model run before presenting an agent outcome. The third attempt also reported `sandbox: read-only` even though the launcher requested `workspace-write`. An [open upstream issue](https://github.com/openai/codex/issues/34961) reports the same Windows symptom, but gives no verified fix for this machine. Do not spend quota on another run until effective CLI permissions are confirmed.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; old slide versions and unrelated template pages remain hidden.
 - [ ] Rehearse the talk track in `presenter/SCRIPT.md` before class.
