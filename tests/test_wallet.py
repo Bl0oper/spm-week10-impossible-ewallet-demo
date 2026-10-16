@@ -15,6 +15,7 @@ class TestWithdraw(unittest.TestCase):
         self.assertEqual(wallet.balance, 100)
 
     def test_exact_balance_withdrawal_rejected(self):
+        # Deliberate conflict: SPEC.md says an exact-balance withdrawal is allowed.
         wallet = EWallet(balance=100)
         self.assertFalse(wallet.withdraw(100))
         self.assertEqual(wallet.balance, 100)

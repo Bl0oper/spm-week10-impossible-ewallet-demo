@@ -11,7 +11,7 @@ param(
     [string]$Name
 )
 
-# Must match Get-RunDir in new_run.ps1.
+# Use the same folder-name recipe as new_run.ps1 to find that exact run.
 function Get-RunDir([string]$RunName) {
     $sha = [System.Security.Cryptography.SHA1]::Create()
     $bytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($RunName))
@@ -31,8 +31,7 @@ if (-not (Test-Path (Join-Path $runDir '.git'))) {
     exit 1
 }
 
-# Stage everything (including new files) and diff against the very first
-# commit, so changes still count if the agent made its own commits.
+# Include new files and agent-created commits by comparing with the clean first commit.
 git -C "$runDir" add -A
 $root = (git -C "$runDir" rev-list --max-parents=0 HEAD | Select-Object -First 1)
 git -C "$runDir" diff --cached $root "--output=$diffPath"
@@ -41,6 +40,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 $changed = @(git -C "$runDir" diff --cached --name-status $root)
+# The CI gate watches tests/, so record whether this run touched that folder.
 $testsChanged = @($changed | Where-Object { $_ -match '\stests/' }).Count -gt 0
 
 Write-Host "Saved diff : runs\$Name.diff"
@@ -58,9 +58,11 @@ else {
 }
 
 if (Test-Path $mdPath) {
+    # Never replace notes that may already contain the model, transcript, or results.
     Write-Host "runs\$Name.md already exists; left untouched." -ForegroundColor Yellow
 }
 else {
+    # Leave blanks for the presenter to fill using the real run and check results.
     if ($changed.Count -eq 0) { $fileList = '    (none)' }
     else { $fileList = ($changed | ForEach-Object { "    $_" }) -join "`n" }
     $testsText = if ($testsChanged) { 'yes' } else { 'no' }

@@ -32,6 +32,7 @@ if ($DiffFile) {
 
 $work = Join-Path $env:TEMP ("ewallet-check-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
 New-Item -ItemType Directory -Path $work | Out-Null
+# Apply and test changes in a disposable copy, never in the presentation repo itself.
 foreach ($item in 'SPEC.md', 'TASK.md', 'ewallet', 'tests', 'heldout') {
     Copy-Item -Path (Join-Path $repo $item) -Destination $work -Recurse
 }
@@ -63,6 +64,7 @@ try {
     $visiblePass = ($LASTEXITCODE -eq 0)
 
     Write-Host ""
+    # Run the owner-only checks separately so the two outcomes are easy to compare.
     Write-Host "--- Held-out tests (heldout/) ---"
     cmd /c "$py -m unittest discover -s heldout 2>&1"
     $heldoutPass = ($LASTEXITCODE -eq 0)
@@ -78,6 +80,7 @@ function Write-Result([string]$Label, [bool]$Pass) {
 }
 
 Write-Host ""
+# A zero exit code means both checks completed; use the printed PASS/FAIL lines as results.
 Write-Result 'VISIBLE:  ' $visiblePass
 Write-Result 'HELD-OUT: ' $heldoutPass
 exit 0

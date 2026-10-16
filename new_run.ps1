@@ -10,7 +10,7 @@ param(
     [string]$Name
 )
 
-# Folder name is a hash of the run name, so the path gives the agent no hints.
+# Use an opaque folder name so the run label does not hint which prompt the agent got.
 function Get-RunDir([string]$RunName) {
     $sha = [System.Security.Cryptography.SHA1]::Create()
     $bytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($RunName))
@@ -18,6 +18,7 @@ function Get-RunDir([string]$RunName) {
     Join-Path $env:TEMP "ewallet-$hex"
 }
 
+# Anchor file paths to this repo even if PowerShell was opened in another folder.
 $repo = $PSScriptRoot
 $runDir = Get-RunDir $Name
 $kind = $Name.Split('-')[0]
@@ -33,7 +34,7 @@ if (Test-Path $runDir) {
     exit 1
 }
 
-# Copy ONLY the task files. No README, no heldout/, no examples/, no prompts.
+# Give each run a clean task copy with only the files the agent is meant to see.
 New-Item -ItemType Directory -Path $runDir | Out-Null
 foreach ($item in 'SPEC.md', 'TASK.md', 'ewallet', 'tests') {
     Copy-Item -Path (Join-Path $repo $item) -Destination $runDir -Recurse
@@ -42,6 +43,7 @@ Get-ChildItem -Path $runDir -Recurse -Directory -Filter '__pycache__' | Remove-I
 
 Push-Location $runDir
 try {
+    # Keep a clean starting commit so save_run.ps1 can capture all later changes.
     git init -q -b main
     git config core.autocrlf true
     git config core.safecrlf false
@@ -60,6 +62,7 @@ finally {
 
 $copied = $false
 try {
+    # baseline-* uses baseline.md; strict-* uses strict.md.
     [System.IO.File]::ReadAllText($promptFile) | Set-Clipboard
     $copied = $true
 }
