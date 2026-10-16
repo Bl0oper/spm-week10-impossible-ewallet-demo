@@ -1,6 +1,6 @@
 # Part 2: `Can you show it?` (2 minutes)
 
-Use the copied Canva deck's `Show Time` divider (page 15). Switch to the repository and GitHub for the demo, then return to the final guidance slide, references, and Thank You slide (pages 16–18 in the copied deck). Check current page numbers in Canva before class if hidden pages have changed the order.
+Use the copied Canva deck's `Show Time` divider (page 15). Switch to the repository and GitHub for the demo, then return to the guidance slide (page 14), references (page 17), and Thank You slide (page 18) in the copied deck. Check the visible page numbers in Canva before class if hidden pages have changed the order.
 
 ## Before class
 

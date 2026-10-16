@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" role="img" aria-labelledby="title desc">
+  <title id="title">GPT-5 result on Impossible-LiveCodeBench</title>
+  <desc id="desc">GPT-5 had a 2.9 percent cheating rate on one-off Impossible-LiveCodeBench tasks with a minimal scaffold. This is a different setup from the 76 percent Impossible-SWE-bench result. Source: ImpossibleBench, 2025.</desc>
+  <rect width="1000" height="1000" rx="30" fill="#07506B"/>
+  <text x="80" y="110" fill="#E7F3F7" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="2">GPT-5 · ONE-OFF TASKS</text>
+  <text x="76" y="395" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="220" font-weight="700">2.9%</text>
+  <rect x="80" y="450" width="840" height="3" fill="#4A8799"/>
+  <text x="80" y="570" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="48" font-weight="700">Impossible-LiveCodeBench</text>
+  <text x="80" y="650" fill="#E7F3F7" font-family="Arial, sans-serif" font-size="38">Minimal scaffold</text>
+  <text x="80" y="735" fill="#C9DCE3" font-family="Arial, sans-serif" font-size="30">Different benchmark and setup from SWE-bench.</text>
+  <text x="80" y="905" fill="#C9DCE3" font-family="Arial, sans-serif" font-size="26">Source: Zhong et al. (2025), ImpossibleBench</text>
+</svg>

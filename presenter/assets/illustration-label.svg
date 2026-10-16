@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 90" role="img" aria-labelledby="title desc">
+  <title id="title">Illustration label</title>
+  <desc id="desc">This is an illustration, not a recorded model run.</desc>
+  <rect width="620" height="90" rx="16" fill="#07506B"/>
+  <text x="28" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="1">ILLUSTRATION · NOT A RUN RESULT</text>
+</svg>
