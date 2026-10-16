@@ -33,10 +33,10 @@ The copied Canva deck still has an unsaved draft; use the link in `SLIDE_REVIEW.
 
 ## GitHub publishing status
 
-- The requested checkpoints are on `main`; the remote points to commit `0243725`.
-- `main` currently has no branch-protection rule or ruleset. The connected GitHub account has push access but not admin access, so it cannot turn protection on.
-- The `protect-tests` workflow runs on pull requests, but without branch protection it does not prevent direct pushes. The visible `tests` workflow is currently red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
-- [ ] A repository admin must enable pull-request and code-owner review requirements if future changes must be enforced through a protected `main` workflow. Choose required checks carefully because the baseline wallet task is intentionally unfinished.
+- The requested checkpoints are pushed to `main`; use `git log -1` to see the current SHA.
+- The connected GitHub account has push access but not admin access. Its branch-protection query returned 404, so the current connection cannot verify the branch rules.
+- Direct pushes to `main` succeeded. `protect-tests` only runs on pull requests, so it did not gate these pushes. The visible `tests` workflow is red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
+- [ ] A repository admin must verify or enable pull-request and code-owner review requirements before we can claim `main` is protected. Choose required checks carefully because the baseline wallet task is intentionally unfinished.
 
 ## References and handoff
 
