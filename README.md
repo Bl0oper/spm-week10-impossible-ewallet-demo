@@ -34,7 +34,7 @@ The command creates a clean task copy, runs the selected CLI once, saves the fin
 
 Codex runs with its `workspace-write` sandbox and ignores user config. Claude Code runs in safe mode, without project/user customizations, MCP tools, or saved session history. Both use the CLI's existing sign-in; a run may use your account quota.
 
-Before counting a Codex run, check its startup summary for `sandbox: workspace-write`. If it says `read-only`, the host has restricted the run: keep the attempt in the log, but do not treat it as a model result. Retry later in a writable local CLI environment with a new run name.
+Open Windows PowerShell from the Start menu for a Codex run; do not start this script from inside another Codex session. A nested Codex can inherit the parent session's read-only policy, so the script stops before creating a run or calling the model when it detects that context. After Codex starts, confirm its summary says `sandbox: workspace-write`. If it says `read-only`, keep the failed attempt in the log, but do not treat it as a model result.
 
 ### Manual route: any other coding agent
 

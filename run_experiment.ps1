@@ -75,6 +75,14 @@ if (-not $PSCmdlet.ShouldProcess("run '$Name' with $Runner and model '$Model'", 
     return
 }
 
+# Avoid launching a second Codex inside a Codex-controlled shell. The parent
+# session can enforce read-only policy even when this script requests writes.
+if ($Runner -eq 'codex' -and ($env:CODEX_SESSION_ID -or $env:CODEX_THREAD_ID)) {
+    Write-Host "This PowerShell is inside a Codex session, so a nested Codex run may inherit its read-only policy." -ForegroundColor Yellow
+    Write-Host "Open a separate PowerShell window from the Windows Start menu and run this command there. No model was started."
+    exit 1
+}
+
 # PrepareOnly skips VS Code and the clipboard; the selected CLI receives the prompt directly.
 $preparedOutput = @(& (Join-Path $PSScriptRoot 'new_run.ps1') -Name $Name -Model $Model -Runner $Runner -PrepareOnly)
 if ($preparedOutput.Count -eq 0) {
