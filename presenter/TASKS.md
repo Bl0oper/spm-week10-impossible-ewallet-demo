@@ -18,7 +18,9 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [x] Show the GPT-5 76% Impossible-SWE-bench result once, with the full-scaffold context; keep the separate 2.9% LiveCodeBench result in its own minimal-scaffold context.
 - [x] Scope monitor ranges to Sonnet 4 and Opus 4 on Impossible-SWE-bench.
 - [x] Improve contrast and enlarge slide copy, including the references page.
-- [ ] Review the final previews and approve saving the draft copy.
+- [x] Review the final previews of pages 3, 4, 5, 7, 9, 10, 12, and 17.
+- [ ] Refresh the copied deck's speaker notes on pages 3 and 7. Page 3 still has the broad Claude claim; page 7's note repeats 76% and blurs the two setups.
+- [ ] Save the reviewed visual draft after approval.
 
 ## Remaining before class
 

@@ -5,7 +5,7 @@ Updated 16 October 2026. This review describes the copied deck and its unsaved d
 - **Original deck:** [Canva design DAHW2fSZJDY](https://www.canva.com/design/DAHW2fSZJDY)
 - **Working copy:** [Canva design DAHYJzKOQk8](https://www.canva.com/design/DAHYJzKOQk8/X1gkywJDYR4lnF6IIJ14Bw/edit)
 - **Working copy size:** 27 pages. Duplicates were added so the old versions could stay hidden.
-- **Current state:** draft edits are visible in the working copy, but have not been saved. Review the preview and approve before saving.
+- **Current state:** visual draft edits are visible in the working copy, but have not been saved. Final visual previews were reviewed. Presenter notes on pages 3 and 7 still contain old wording and need cleanup before presenting.
 
 ## Page map
 
@@ -44,4 +44,5 @@ The presentation currently has 12 visible pages. Pages 19–27 are hidden rather
 - Confirm the saved copy still has the original pages hidden and the revised copies visible.
 - Confirm the visible slides contain only one 76% result, with its model, benchmark, and scaffold beside it.
 - Do not present the illustration as a real experiment. The repository currently has no completed model runs.
+- Refresh speaker notes on page 3 with the scoped METR description, and on page 7 with the 2.9% minimal-scaffold setup only. The current page 7 note repeats the 76% figure.
 - Check the page numbers in Canva after the draft is saved; hidden pages may be reordered later.
