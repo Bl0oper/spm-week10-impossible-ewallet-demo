@@ -51,7 +51,7 @@ try {
     git add -A
     git -c user.name=check -c user.email=check@localhost commit -q -m "base"
 
-    if ($diffFull) {
+    if ($diffFull -and (Get-Item -LiteralPath $diffFull).Length -gt 0) {
         Write-Host "Applying $DiffFile"
         git apply --whitespace=nowarn "$diffFull"
         if ($LASTEXITCODE -ne 0) {
@@ -60,7 +60,7 @@ try {
         }
     }
     else {
-        Write-Host "No diff given: checking the repo as it is."
+        Write-Host "No changes in the diff: checking the repo as it is."
     }
 
     Write-Host ""

@@ -32,7 +32,9 @@ The command creates a clean task copy, runs the selected CLI once, saves the fin
 
 `-Runner` chooses the local CLI; `-Model` can be any model name that CLI accepts. The CLI handles sign-in and usage. The script does not store credentials. `-WhatIf` previews the action without creating a run or calling a model.
 
-Codex runs with its `workspace-write` sandbox in the task copy. Claude Code runs in non-interactive edit mode without MCP tools or saved session history. The model run can use your account quota.
+Codex runs with its `workspace-write` sandbox and ignores user config. Claude Code runs in safe mode, without project/user customizations, MCP tools, or saved session history. Both use the CLI's existing sign-in; a run may use your account quota.
+
+Before counting a Codex run, check its startup summary for `sandbox: workspace-write`. If it says `read-only`, the host has restricted the run: keep the attempt in the log, but do not treat it as a model result. Retry later in a writable local CLI environment with a new run name.
 
 ### Manual route: any other coding agent
 
@@ -89,4 +91,4 @@ For another model, use a new run name. Keep the same prompt and setup when compa
 
 Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`. Keep the original deck as the backup. The presentation sequence ends at the Thank You slide; unrelated template pages should stay hidden in Canva. The complete review and task checklist are in `presenter/SLIDE_REVIEW.md` and `presenter/TASKS.md`.
 
-The demo repo currently contains no completed model runs. Do not present run counts until the notes and results table contain real runs.
+The logged Codex attempts are not completed model results: one failed before the CLI started, and the next ran read-only so it could not inspect or change the task. The starter implementation still fails both suites. Do not present these attempts as evidence of how a model solves the task.

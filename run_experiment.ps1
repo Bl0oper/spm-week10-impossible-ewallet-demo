@@ -30,7 +30,12 @@ function Get-RunDir([string]$RunName) {
     Join-Path $env:TEMP "ewallet-$hex"
 }
 
-$runnerCommand = Get-Command -Name $Runner -CommandType Application -ErrorAction SilentlyContinue
+# Node-based CLIs on Windows can expose both a .cmd launcher and an extensionless
+# shim. Choose one real launcher explicitly so PowerShell does not pass both as
+# one malformed command name.
+$runnerCommand = Get-Command -Name $Runner -CommandType Application -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -match '\.(cmd|bat|exe)$' } |
+    Select-Object -First 1
 if (-not $runnerCommand) {
     Write-Host "The '$Runner' CLI was not found. Install and sign in to it, or use the manual steps in README.md." -ForegroundColor Red
     exit 1
@@ -84,6 +89,7 @@ if (-not (Test-Path (Join-Path $runDir '.git'))) {
 
 $promptText = [System.IO.File]::ReadAllText($promptPath)
 $agentExitCode = 1
+$agentFailure = ''
 Write-Host "Starting one $Runner run with model label '$Model'. This uses the CLI's existing account and may use its quota."
 
 Push-Location $runDir
@@ -99,21 +105,21 @@ try {
             '--output-last-message', $answerPath,
             '-'
         )
-        $promptText | & $runnerCommand.Source @codexArgs
+        $promptText | & $runnerCommand.Path @codexArgs
         $agentExitCode = $LASTEXITCODE
     }
     else {
-        # Claude edits through acceptEdits. MCP settings are disabled; this non-interactive run cannot ask for shell approval.
+        # Safe mode removes project/user customizations; acceptEdits allows file edits without bypassing CLI protections.
         $claudeArgs = @(
             '--print',
             '--model', $Model,
             '--output-format', 'text',
             '--permission-mode', 'acceptEdits',
             '--no-session-persistence',
-            '--strict-mcp-config',
+            '--safe-mode',
             $promptText
         )
-        $agentLines = & $runnerCommand.Source @claudeArgs
+        $agentLines = & $runnerCommand.Path @claudeArgs
         $agentExitCode = $LASTEXITCODE
         $agentText = ($agentLines | ForEach-Object { [string]$_ }) -join [Environment]::NewLine
         if (-not [string]::IsNullOrWhiteSpace($agentText)) {
@@ -122,7 +128,8 @@ try {
     }
 }
 catch {
-    Write-Host "The $Runner CLI could not finish: $($_.Exception.Message)" -ForegroundColor Yellow
+    $agentFailure = "The $Runner CLI could not finish: $($_.Exception.Message)"
+    Write-Host $agentFailure -ForegroundColor Yellow
     $agentExitCode = 1
 }
 finally {
@@ -135,7 +142,12 @@ if (-not $answerMissing) {
     $answerEmpty = [string]::IsNullOrWhiteSpace([System.IO.File]::ReadAllText($answerPath))
 }
 if ($answerMissing -or $answerEmpty) {
-    $message = "No final message was captured from $Runner. CLI exit code: $agentExitCode."
+    if ($agentFailure) {
+        $message = "$agentFailure`nCLI exit code: $agentExitCode. No final model message was captured."
+    }
+    else {
+        $message = "No final message was captured from $Runner. CLI exit code: $agentExitCode."
+    }
     [System.IO.File]::WriteAllText($answerPath, $message, (New-Object System.Text.UTF8Encoding $false))
 }
 
