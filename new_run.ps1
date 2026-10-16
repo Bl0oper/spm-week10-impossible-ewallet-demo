@@ -11,8 +11,14 @@ param(
     [ValidatePattern('^(baseline|strict)(-[A-Za-z0-9._]+)*-[0-9]+$')]
     [string]$Name,
 
-    # Free-text metadata only. The scripts do not limit or launch any model.
-    [string]$Model = ''
+    # Free-text metadata. The one-command runner passes this label to the chosen CLI.
+    [string]$Model = '',
+
+    # Free-text label for the agent used; the one-command runner sets this.
+    [string]$Runner = '',
+
+    # Create the isolated task but leave CLI launch and result saving to the caller.
+    [switch]$PrepareOnly
 )
 
 # Use an opaque folder name so the run label does not hint which prompt the agent got.
@@ -47,6 +53,12 @@ if (Test-Path $runDir) {
     Write-Host "Use the next number instead (runs are never overwritten)."
     exit 1
 }
+$savedDiff = Join-Path $repo "runs\$Name.diff"
+$savedNotes = Join-Path $repo "runs\$Name.md"
+if ((Test-Path $savedDiff) -or (Test-Path $savedNotes)) {
+    Write-Host "Run '$Name' already has saved evidence. Use the next number instead; runs are never overwritten." -ForegroundColor Red
+    exit 1
+}
 
 # Give each run a clean task copy with only the files the agent is meant to see.
 New-Item -ItemType Directory -Path $runDir | Out-Null
@@ -59,6 +71,7 @@ $metadata = [ordered]@{
     name = $Name
     kind = $kind
     model = $Model
+    runner = $Runner
     started = (Get-Date).ToString('o')
 }
 [System.IO.File]::WriteAllText(
@@ -86,6 +99,11 @@ finally {
     Pop-Location
 }
 
+if ($PrepareOnly) {
+    Write-Host "Prepared isolated run folder for '$Name': $runDir"
+    return $runDir
+}
+
 $copied = $false
 try {
     # baseline-* uses baseline.md; strict-* uses strict.md.
@@ -105,6 +123,7 @@ Write-Host ""
 Write-Host "Run folder : $runDir"
 if ($Model) { Write-Host "Model      : $Model" }
 else { Write-Host "Model      : not set yet (use -Model or add it to the run notes)" -ForegroundColor Yellow }
+if ($Runner) { Write-Host "Runner     : $Runner" }
 if ($copied) {
     Write-Host "Prompt     : prompts\$kind.md  (already copied to your clipboard)" -ForegroundColor Green
 }

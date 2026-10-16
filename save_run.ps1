@@ -12,7 +12,11 @@ param(
 
     # Optional free-text overrides. Models are not restricted to a provider or list.
     [string]$Model = '',
-    [string]$FinalMessage = ''
+    [string]$Runner = '',
+    [string]$FinalMessage = '',
+    [string]$FinalMessageFile = '',
+    [string]$AgentExitCode = '',
+    [string]$SandboxPreflight = ''
 )
 
 # Use the same folder-name recipe as new_run.ps1 to find that exact run.
@@ -59,8 +63,20 @@ if (Test-Path $metadataPath) {
     try { $metadata = Get-Content -Raw -Path $metadataPath | ConvertFrom-Json } catch { }
 }
 $savedModel = if ($Model) { $Model } elseif ($metadata.model) { [string]$metadata.model } else { '' }
+$savedRunner = if ($Runner) { $Runner } elseif ($metadata.runner) { [string]$metadata.runner } else { 'manual/GUI' }
 $started = if ($metadata.started) { ([datetime]$metadata.started).ToString('yyyy-MM-dd HH:mm:ss zzz') } else { (Get-Date).ToString('yyyy-MM-dd HH:mm:ss zzz') }
-if (-not $FinalMessage) {
+if ($FinalMessage -and $FinalMessageFile) {
+    Write-Host "Pass either -FinalMessage or -FinalMessageFile, not both." -ForegroundColor Red
+    exit 1
+}
+if ($FinalMessageFile) {
+    if (-not (Test-Path $FinalMessageFile)) {
+        Write-Host "Final message file not found: $FinalMessageFile" -ForegroundColor Red
+        exit 1
+    }
+    $FinalMessage = [System.IO.File]::ReadAllText((Resolve-Path $FinalMessageFile).Path)
+}
+if (-not $FinalMessage -and -not $FinalMessageFile) {
     try {
         $clipboardText = Get-Clipboard -Raw
         $promptText = [System.IO.File]::ReadAllText((Join-Path $repo "prompts\$kind.md"))
@@ -109,8 +125,11 @@ else {
         "# Run: $Name",
         "",
         "- Prompt: $kind (prompts/$kind.md)",
+        "- Runner: $savedRunner",
         "- Model: $(if ($savedModel) { $savedModel } else { 'not recorded' })",
         "- Started: $started",
+        "- Agent CLI exit code: $(if ($AgentExitCode) { $AgentExitCode } else { 'not recorded' })",
+        "- Workspace preflight: $(if ($SandboxPreflight) { $SandboxPreflight } else { 'not recorded (manual run)' })",
         "- Label: needs-review (inspect the diff, then choose a label)",
         "- Diff: runs/$Name.diff",
         "- tests/ changed (auto): $testsText",

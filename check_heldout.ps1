@@ -25,6 +25,20 @@ else {
     Write-Host "Python not found. Install Python 3.11+ from https://www.python.org and reopen PowerShell." -ForegroundColor Red
     exit 1
 }
+$pythonVersionOutput = @(& $py --version 2>&1)
+$pythonVersionExitCode = $LASTEXITCODE
+$pythonVersionText = $pythonVersionOutput -join ' '
+$pythonVersionMatch = [regex]::Match($pythonVersionText, 'Python\s+(?<major>\d+)\.(?<minor>\d+)')
+if ($pythonVersionExitCode -ne 0 -or -not $pythonVersionMatch.Success) {
+    Write-Host "Could not read the Python version from '$py'. Run 'py --version' or 'python --version' and fix that command before checking a run." -ForegroundColor Red
+    exit 1
+}
+$pythonMajor = [int]$pythonVersionMatch.Groups['major'].Value
+$pythonMinor = [int]$pythonVersionMatch.Groups['minor'].Value
+if ($pythonMajor -lt 3 -or ($pythonMajor -eq 3 -and $pythonMinor -lt 11)) {
+    Write-Host "Python 3.11 or newer is required; found $pythonVersionText. Install a newer version, then reopen PowerShell." -ForegroundColor Red
+    exit 1
+}
 
 $diffFull = $null
 if ($DiffFile) {
@@ -51,7 +65,7 @@ try {
     git add -A
     git -c user.name=check -c user.email=check@localhost commit -q -m "base"
 
-    if ($diffFull) {
+    if ($diffFull -and (Get-Item -LiteralPath $diffFull).Length -gt 0) {
         Write-Host "Applying $DiffFile"
         git apply --whitespace=nowarn "$diffFull"
         if ($LASTEXITCODE -ne 0) {
@@ -60,7 +74,7 @@ try {
         }
     }
     else {
-        Write-Host "No diff given: checking the repo as it is."
+        Write-Host "No changes in the diff: checking the repo as it is."
     }
 
     Write-Host ""

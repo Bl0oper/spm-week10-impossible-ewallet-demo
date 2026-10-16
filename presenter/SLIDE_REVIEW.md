@@ -4,12 +4,12 @@ Updated 16 October 2026. This review describes the saved edits in the copied dec
 
 - **Original deck:** [Canva design DAHW2fSZJDY](https://www.canva.com/design/DAHW2fSZJDY)
 - **Working copy:** [Canva design DAHYJzKOQk8](https://www.canva.com/design/DAHYJzKOQk8/X1gkywJDYR4lnF6IIJ14Bw/edit)
-- **Working copy size:** 27 pages. Duplicates were added so the old versions could stay hidden.
-- **Current state:** visual edits and corrected presenter notes are saved in the working copy. The original design is unchanged.
+- **Working copy size:** 28 pages. Duplicates were added so the old versions could stay hidden.
+- **Current state:** visual edits, corrected presenter notes, and the METR report citation are saved in the working copy. The original design is unchanged.
 
 ## Page map
 
-Page numbers below are the current numbers in the 27-page working copy, not the old source deck.
+Page numbers below are the current numbers in the 28-page working copy, not the old source deck.
 
 | Working-copy page | Status | Content |
 |---:|---|---|
@@ -25,11 +25,12 @@ Page numbers below are the current numbers in the 27-page working copy, not the 
 | 12 | Visible | Monitor results with benchmark and model context |
 | 13 | Hidden | Extra monitor duplicate; preserved |
 | 14–15 | Visible | Guidance and Show Time divider |
-| 16 | Hidden | Original references slide; preserved |
-| 17–18 | Visible | Revised references and Thank You |
-| 19–27 | Hidden | Unrelated template material; preserved |
+| 16–17 | Hidden | Original references slides; preserved |
+| 18 | Visible | Revised references, including the METR report citation and source URL |
+| 19 | Visible | Thank You |
+| 20–28 | Hidden | Unrelated template material; preserved |
 
-The presentation currently has 12 visible pages. Pages 19–27 are hidden rather than deleted. The source design has not been changed.
+The presentation currently has 12 visible pages: 1, 3, 4, 5, 7, 9, 10, 12, 14, 15, 18, and 19. Pages 20–28 are hidden rather than deleted. The source design has not been changed.
 
 ## Changes in the copied deck draft
 
@@ -37,7 +38,7 @@ The presentation currently has 12 visible pages. Pages 19–27 are hidden rather
 2. **Keep the ImpossibleBench setups distinct.** Page 9 labels GPT-5's 76% result as one-off Impossible-SWE-bench with the full scaffold. The 2.9% comparison is one-off Impossible-LiveCodeBench with the minimal scaffold; the task set and scaffold differ. The 76% figure should appear only once in the visible presentation. See the [ImpossibleBench paper](https://arxiv.org/abs/2510.20270).
 3. **Scope the monitor result.** Page 12 says Sonnet 4 flagged 42–50% and Opus 4 flagged 57–65% of passing cheat transcripts on Impossible-SWE-bench. Those ranges describe these two monitors in that experiment, not every monitor or coding task.
 4. **Improve readability.** Page 4 labels the illustration as not a run result. The smaller copy on the revised benchmark, impact, and monitor slides has been shortened and enlarged. The takeaway on page 10 uses white text on teal for contrast.
-5. **Clean up the references.** Page 17 names the authors, year, paper, and code repository in larger type.
+5. **Clean up the references.** Page 18 names the ImpossibleBench authors, year, paper, and code repository. It also cites METR's *Frontier Risk Report (February to March 2026)*, Appendix D, incident INC-031, with a direct report URL.
 
 ## Before presenting
 
@@ -45,4 +46,4 @@ The presentation currently has 12 visible pages. Pages 19–27 are hidden rather
 - Confirm the visible slides contain only one 76% result, with its model, benchmark, and scaffold beside it.
 - Do not present the illustration as a real experiment. The repository currently has no completed model runs.
 - Confirm the speaker notes on pages 3 and 7 still match `presenter/SCRIPT.md`: page 3 scopes the METR attempt rate; page 7 explains the separate 2.9% setup.
-- Check the page numbers in Canva after the draft is saved; hidden pages may be reordered later.
+- Check the page numbers in Canva before presenting; hidden pages may be reordered later.
