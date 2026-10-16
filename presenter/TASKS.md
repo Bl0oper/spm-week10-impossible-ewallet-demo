@@ -34,7 +34,7 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish PostPlan version 17 with the reviewed baseline result and updated class handoff: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/17).
+- [x] Publish PostPlan version 19 with the reviewed run, current CI state, and current protected-publishing status: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/19).
 - [x] Complete one writable model run before presenting an agent outcome; review the saved answer, diff, and both checks before presenting it.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; references are page 18, Thank You is page 19, and unrelated template pages 20–28 remain hidden.
@@ -44,12 +44,11 @@ The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it; keep a
 
 ## GitHub publishing status
 
-- The copied-slide and earlier guide checkpoints are on `main` at `6f2fbc0`. The one-command CLI workflow is on branch `codex/one-command-agent-runs` and [PR #1 is open](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/1).
-- `.github/CODEOWNERS` assigns owners to `/tests/` and `/.github/` changes, including the reviewer added for this project.
-- The connected GitHub account has push access but not admin access. Its branch-protection query returned 404, so the current connection cannot verify the branch rules.
-- Direct pushes to `main` succeeded. `protect-tests` only runs on pull requests, so it did not gate these pushes. The visible `tests` workflow is red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
-- Existing `.github/CODEOWNERS` entries cover `/tests/` and `/.github/`; this PR changes neither path, so those owners were not requested. `protect-tests` passed; the visible test workflow failed on the intentionally unfinished wallet scaffold. The Copilot review could not run because the requesting account reached its quota limit. No human review is recorded yet; check [PR #1](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/1) for changes.
-- [ ] A repository admin must verify or enable pull-request and code-owner review requirements before we can claim `main` is protected. Choose required checks carefully because the baseline wallet task is intentionally unfinished.
+- The one-command workflow is on branch `codex/one-command-agent-runs`; [PR #1](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/1) is open. The copied-slide checkpoint remains on `main` at `6f2fbc0`.
+- `.github/CODEOWNERS` lists owners for `/tests/` and `/.github/`. This PR changes neither path, so no code-owner review was requested. No human review is recorded; the earlier Copilot request could not run because of quota.
+- Current PR checks: `protect-tests` passed. The `tests` workflow failed in two runs because the untouched starter wallet raises `NotImplementedError` in each of the five visible tests. The saved `baseline-gpt-4` patch is isolated evidence and is not applied to the repository.
+- The GitHub connection has push access but not admin access. The main-branch protection endpoint returned 404 and the rulesets query returned `[]`; no enforced branch-protection rule is visible. A repository admin must configure required PR, review, and check rules before this work can be called published through a protected workflow.
+- [ ] Ask a repository admin to require pull requests and code-owner review. They must decide how the intentionally failing starter `tests` job should be handled before making it a required check.
 
 ## References and handoff
 

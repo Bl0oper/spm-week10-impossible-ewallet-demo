@@ -2,7 +2,7 @@
 .SYNOPSIS
   Run one isolated task with the Codex or Claude Code CLI, then save and check it.
 .EXAMPLE
-  .\run_experiment.ps1 -Name baseline-gpt-1 -Runner codex -Model "your GPT model ID"
+  .\run_experiment.ps1 -Name baseline-gpt-5 -Runner codex -Model "your GPT model ID"
 .EXAMPLE
   .\run_experiment.ps1 -Name baseline-claude-1 -Runner claude -Model "your Claude model ID"
 #>
