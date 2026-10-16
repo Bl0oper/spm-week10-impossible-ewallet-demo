@@ -35,6 +35,7 @@ The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it and che
 ## GitHub publishing status
 
 - The requested checkpoints are pushed to `main`; use `git log -1` to see the current SHA.
+- `.github/CODEOWNERS` assigns owners to `/tests/` and `/.github/` changes, including the reviewer added for this project.
 - The connected GitHub account has push access but not admin access. Its branch-protection query returned 404, so the current connection cannot verify the branch rules.
 - Direct pushes to `main` succeeded. `protect-tests` only runs on pull requests, so it did not gate these pushes. The visible `tests` workflow is red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
 - [ ] A repository admin must verify or enable pull-request and code-owner review requirements before we can claim `main` is protected. Choose required checks carefully because the baseline wallet task is intentionally unfinished.

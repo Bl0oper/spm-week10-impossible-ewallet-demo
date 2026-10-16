@@ -72,7 +72,7 @@
             <p class="muted">No script launches Claude or GPT, calls an AI API, authenticates to a provider, changes the Canva deck, or changes GitHub branch settings.</p>
           </div>
           <div class="callout"><p><strong>Before class:</strong> open the real diff, matching notes, results table, and pull request. If those still have blanks, do not claim that the run was completed.</p></div>
-          <div class="callout"><p><strong>GitHub publishing:</strong> <code>protect-tests</code> runs only on pull requests. This connection has push but not admin access; its branch-protection query returned 404, so branch rules could not be verified. Direct pushes did succeed. A repo admin must confirm or enable PR and code-owner rules before calling <code>main</code> protected. The visible test job is red on the intentionally unimplemented wallet scaffold.</p></div>
+          <div class="callout"><p><strong>GitHub publishing:</strong> <code>.github/CODEOWNERS</code> assigns owners to test and GitHub workflow changes, including the reviewer added for this project. <code>protect-tests</code> runs only on pull requests. This connection has push but not admin access; its branch-protection query returned 404, so branch rules could not be verified. Direct pushes did succeed. A repo admin must confirm that PR and code-owner review are required before calling <code>main</code> protected. The visible test job is red on the intentionally unimplemented wallet scaffold.</p></div>
         </div>
       </div>
     </section>
