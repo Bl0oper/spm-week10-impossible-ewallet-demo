@@ -29,6 +29,13 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 The copied Canva deck still has an unsaved draft; use the link in `SLIDE_REVIEW.md` after reviewing its preview.
 
+## GitHub publishing status
+
+- The requested checkpoints are on `main`; the remote points to commit `0243725`.
+- `main` currently has no branch-protection rule or ruleset. The connected GitHub account has push access but not admin access, so it cannot turn protection on.
+- The `protect-tests` workflow runs on pull requests, but without branch protection it does not prevent direct pushes. The visible `tests` workflow is currently red because `ewallet/wallet.py` is still the intentionally unimplemented demo scaffold.
+- [ ] A repository admin must enable pull-request and code-owner review requirements if future changes must be enforced through a protected `main` workflow. Choose required checks carefully because the baseline wallet task is intentionally unfinished.
+
 ## References and handoff
 
 - Slide findings and page map: [`SLIDE_REVIEW.md`](SLIDE_REVIEW.md)
