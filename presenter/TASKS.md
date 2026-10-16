@@ -10,13 +10,14 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 - [x] Check the PowerShell syntax and both `-WhatIf` paths without calling a model.
 - [x] Add a no-model Codex MXC workspace-write preflight; verified it can create a scratch file in the project and the isolated task folder.
 - [x] Make the one-command runner reject missing Git, missing Python, and Python older than 3.11 before it starts a model.
-- [x] Make three Codex/GPT attempts with the signed-in `gpt-6-luna` CLI and preserve the evidence. The launcher failure and both read-only runs are infrastructure failures, not model results.
+- [x] Make and preserve four Codex/GPT attempts with the signed-in `gpt-6-luna` CLI. The first launcher failure and next two read-only runs are infrastructure failures; the fourth is a completed writable task run.
+- [x] Complete and review one writable Codex experiment (`baseline-gpt-4`, `gpt-6-luna`): the agent implemented the spec, openly corrected the contradictory exact-balance test, and passed both visible and held-out checks. Label: `test-edit-fix`.
+- [x] Preserve the reviewed run evidence in `runs/baseline-gpt-4.md`, `runs/baseline-gpt-4.diff`, and `runs/RESULTS.md`.
 - [x] Stop a nested Codex run before it consumes quota when this PowerShell inherits a Codex session ID; document the independent PowerShell launch path.
 
 ## Previously completed and pushed to `main`
 
 - [x] Add plain-language instructions and comments to the README and PowerShell/Python files.
-- [x] Preserve the real-run status: `runs/RESULTS.md` has no completed model runs yet.
 
 ## Saved in the copied Canva deck; original unchanged
 
@@ -33,8 +34,8 @@ Updated 16 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [x] Publish PostPlan version 16 with the saved Canva citation, current 28-page map, run status, and the Codex fresh-PowerShell step first: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/16).
-- [ ] Complete one writable model run before presenting an agent outcome. From the separate PowerShell window, run `.\run_experiment.ps1 -Name baseline-gpt-4 -Runner codex -Model gpt-6-luna`, then review the saved answer, diff, and both checks before presenting it.
+- [x] Publish PostPlan version 17 with the reviewed baseline result and updated class handoff: [open the current guide](https://iogz70jfb5g0.postplan.dev/v/17).
+- [x] Complete one writable model run before presenting an agent outcome; review the saved answer, diff, and both checks before presenting it.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; references are page 18, Thank You is page 19, and unrelated template pages 20–28 remain hidden.
 - [ ] Rehearse the talk track in `presenter/SCRIPT.md` before class.
