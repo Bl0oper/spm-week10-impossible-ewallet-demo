@@ -35,7 +35,7 @@ Updated 18 October 2026. This is the short handoff list; see the linked files fo
 
 ## Remaining before class
 
-- [ ] Publish the updated guided-run instructions to PostPlan after final checks.
+- [x] Publish the updated guided-run instructions as [PostPlan v23](https://iogz70jfb5g0.postplan.dev/v/23); keep the local copy in `artifacts/ewallet-postplan.html`.
 - [x] Complete one writable model run before presenting an agent outcome; review the saved answer, diff, and both checks before presenting it.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; references are page 18, Thank You is page 19, and unrelated template pages 20–28 remain hidden.
@@ -47,7 +47,7 @@ The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it; keep a
 
 - The guided runner is on branch `codex/one-command-agent-runs`; [PR #1](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/1) is open. The copied-slide checkpoint remains on `main` at `6f2fbc0`.
 - The existing `.github/CODEOWNERS` covers `/tests/` and `/.github/`. This PR changes the workflow under `/.github/`; once rules are active it will request owner review. Keep one general approval required as well.
-- The legacy `tests` workflow intentionally fails while the starter wallet raises `NotImplementedError`; keep that check optional. Require `protect-tests` and the three new platform-specific `runner-tests` checks. The saved `baseline-gpt-4` patch remains isolated evidence.
+- Latest PR checks: `protect-tests` passed and `runner-tests` passed on Ubuntu, Windows, and macOS. The two legacy `tests` runs failed on the unfinished starter wallet as expected. Require the first four checks and keep `tests` optional. The saved `baseline-gpt-4` patch remains isolated evidence.
 - The GitHub connection has push access but not admin access. The main-branch protection endpoint returned 404 and the rulesets query returned `[]`; no enforced branch-protection rule is visible. A repository admin must configure required PR, review, and check rules before this work can be called published through a protected workflow.
 - [ ] Ask a repository admin to follow [`ADMIN_SETUP.md`](../ADMIN_SETUP.md): require PRs, one approval, `protect-tests`, and the three `runner-tests` checks; keep the starter `tests` check visible but optional.
 

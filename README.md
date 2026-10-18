@@ -82,7 +82,7 @@ Keep every run, including failures and empty patches. Use the same prompt and se
 
 ## Presentation
 
-Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`; the original stays unchanged. The presentation sequence ends at Thank You, with unrelated template pages hidden. Slide comments, the presenter script, and the checklist are in `presenter/SLIDE_REVIEW.md`, `presenter/SCRIPT.md`, and `presenter/TASKS.md`. The current walkthrough is [PostPlan v22](https://iogz70jfb5g0.postplan.dev/v/22), with a local copy in `artifacts/ewallet-postplan.html`.
+Use the copied Canva working deck linked in `presenter/SLIDE_REVIEW.md`; the original stays unchanged. The presentation sequence ends at Thank You, with unrelated template pages hidden. Slide comments, the presenter script, and the checklist are in `presenter/SLIDE_REVIEW.md`, `presenter/SCRIPT.md`, and `presenter/TASKS.md`. The current walkthrough is [PostPlan v23](https://iogz70jfb5g0.postplan.dev/v/23), with a local copy in `artifacts/ewallet-postplan.html`.
 
 ## Experiment history and GitHub status
 
