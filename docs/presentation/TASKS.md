@@ -30,16 +30,16 @@ Updated 18 October 2026. This is the short handoff list; see the linked files fo
 - [x] Improve contrast and enlarge slide copy, including the references page.
 - [x] Review the final previews of pages 3, 4, 5, 7, 9, 10, 12, and 18.
 - [x] Save the reviewed visual edits and METR report citation on page 18 in copied deck `DAHYJzKOQk8`.
-- [x] Replace speaker notes on pages 3 and 7 with the corrected text in `presenter/SCRIPT.md`.
+- [x] Replace speaker notes on pages 3 and 7 with the corrected text in `SCRIPT.md`.
 - [x] Verify both saved notes and the page 7 2.9% benchmark label in Canva. Original design `DAHW2fSZJDY` remains unchanged.
 
 ## Remaining before class
 
-- [x] Publish the updated guided-run instructions as [PostPlan v23](https://iogz70jfb5g0.postplan.dev/v/23); keep the local copy in `artifacts/ewallet-postplan.html`.
+- [x] Publish the updated guided-run instructions as [PostPlan v23](https://iogz70jfb5g0.postplan.dev/v/23); keep the local copy in `ewallet-postplan.html` (now an out-of-date snapshot; the README has the current steps).
 - [x] Complete one writable model run before presenting an agent outcome; review the saved answer, diff, and both checks before presenting it.
 - [x] Review the saved diffs and notes; label the launcher and read-only failures as `other` and preserve both check results.
 - [x] Verify the copied deck's 12-page visible sequence; references are page 18, Thank You is page 19, and unrelated template pages 20–28 remain hidden.
-- [ ] Rehearse the talk track in `presenter/SCRIPT.md` before class.
+- [ ] Rehearse the talk track in `SCRIPT.md` before class.
 
 The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it; keep any last-minute slide edits in that copy and rehearse from `SCRIPT.md`.
 
@@ -49,10 +49,10 @@ The reviewed copy is saved. Use the link in `SLIDE_REVIEW.md` to open it; keep a
 - The existing `.github/CODEOWNERS` covers `/tests/` and `/.github/`. This PR changes the workflow under `/.github/`; once rules are active it will request owner review. Keep one general approval required as well.
 - Latest PR checks: `protect-tests` passed and `runner-tests` passed on Ubuntu, Windows, and macOS. The two legacy `tests` runs failed on the unfinished starter wallet as expected. Require the first four checks and keep `tests` optional. The saved `baseline-gpt-4` patch remains isolated evidence.
 - The GitHub connection has push access but not admin access. The main-branch protection endpoint returned 404 and the rulesets query returned `[]`; no enforced branch-protection rule is visible. A repository admin must configure required PR, review, and check rules before this work can be called published through a protected workflow.
-- [ ] Ask a repository admin to follow [`ADMIN_SETUP.md`](../ADMIN_SETUP.md): require PRs, one approval, `protect-tests`, and the three `runner-tests` checks; keep the starter `tests` check visible but optional.
+- [ ] Ask a repository admin to follow [`admin-setup.md`](../admin-setup.md): require PRs, one approval, `protect-tests`, and the three `runner-tests` checks; keep the starter `tests` check visible but optional.
 
 ## References and handoff
 
 - Slide findings and page map: [`SLIDE_REVIEW.md`](SLIDE_REVIEW.md)
 - Presenter talk track and checklist: [`SCRIPT.md`](SCRIPT.md)
-- Run instructions: [`README.md`](../README.md)
+- Run instructions: [`README.md`](../../README.md)

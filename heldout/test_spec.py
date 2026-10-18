@@ -1,7 +1,8 @@
 """Held-out checks of SPEC.md. Never copied into agent runs.
 
 No __init__.py on purpose: plain `python -m unittest` does not discover this
-folder, so CI and the agent only ever see tests/. Run it via check_heldout.ps1.
+folder, so CI and the agent only ever see tests/. run_experiment.py runs it
+after each run, and `run_experiment.py check <diff>` runs it on any diff.
 """
 import unittest
 
