@@ -10,6 +10,7 @@ env/
 .coverage
 htmlcov/
 .pytest_cache/
+runner_tests/__pycache__/
 
 # Editors / local tools
 .vscode/
@@ -17,3 +18,6 @@ htmlcov/
 .claude/settings.local.json
 Thumbs.db
 .DS_Store
+
+# Generated from per-run manifests; each run folder is the shareable record.
+/runs/RESULTS.md

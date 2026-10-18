@@ -1,0 +1,22 @@
+{
+  "run_id": "baseline-gpt-1",
+  "runner": "codex",
+  "model": "gpt-6-luna",
+  "prompt_kind": "baseline",
+  "started": "2026-10-16T16:58:03+08:00",
+  "status": "not-started",
+  "label": "other: launcher failure; model not started",
+  "agent_exit_code": 1,
+  "sandbox_preflight": "not run (CLI launcher failed)",
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL"
+    },
+    "heldout": {
+      "result": "FAIL"
+    }
+  },
+  "historical": true
+}

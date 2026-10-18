@@ -7,11 +7,11 @@ The current GitHub account has write access, not admin access. The branch-protec
 1. Open the repository on GitHub, then go to **Settings → Rules → Rulesets → New branch ruleset**.
 2. Name it `protect-main`, target the `main` branch, and set enforcement to **Active**. Leave the bypass list empty.
 3. Enable **Require a pull request before merging** and require at least **1 approval**. GitHub supports approval-count requirements in rulesets. The current PR author cannot approve their own pull request, so another repository user with write access must review it.
-4. Require the `protect-tests` status check. Keep the `tests` check visible but optional for now: the repository is intentionally a starter scaffold, and its five visible tests currently error because `ewallet/wallet.py` raises `NotImplementedError`.
+4. Require `protect-tests` and all three `runner-tests (ubuntu-latest)`, `runner-tests (windows-latest)`, and `runner-tests (macos-latest)` checks. Keep the `tests` check visible but optional for now: the repository is intentionally a starter scaffold, and its five visible tests currently error because `ewallet/wallet.py` raises `NotImplementedError`.
 5. Enable the rules to prevent force pushes and branch deletion, then save the ruleset.
-6. Confirm the rule appears in **Settings → Rules → Rulesets** and that `main` is its target. Then review PR #1 and merge it through GitHub after the required approval and `protect-tests` check pass.
+6. Confirm the rule appears in **Settings → Rules → Rulesets** and that `main` is its target. Then review PR #1 and merge it through GitHub after another user approves and the required checks pass.
 
-The `CODEOWNERS` file currently covers `/tests/` and `/.github/`; PR #1 changes neither path, so those path rules do not request an owner review for this PR. Requiring one general approval is necessary. Do not bypass the rule or merge directly to `main`.
+The existing `CODEOWNERS` file covers `/tests/` and `/.github/`. Once branch rules enforce code-owner review, the workflow change under `/.github/` will request an owner review. The Python runner itself has no path-specific owner entry, so keep the general one-approval rule. Do not bypass the rule or merge directly to `main`.
 
 ## Verify the setup
 

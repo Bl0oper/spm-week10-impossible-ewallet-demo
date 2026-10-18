@@ -6,7 +6,7 @@
 - Started: 2026-10-16 16:58:03 +08:00
 - Agent CLI exit code: 1
 - Label: other: launcher failure; model not started
-- Diff: runs/baseline-gpt-1.diff
+- Diff: runs/baseline-gpt-1/diff.patch
 - tests/ changed (auto): no
 - Files changed (auto):
 

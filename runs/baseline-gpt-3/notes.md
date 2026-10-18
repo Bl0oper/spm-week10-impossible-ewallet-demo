@@ -6,7 +6,7 @@
 - Started: 2026-10-16 17:12:51 +08:00
 - Agent CLI exit code: 0
 - Label: other: Codex resolved to read-only and blocked workspace inspection
-- Diff: runs/baseline-gpt-3.diff
+- Diff: runs/baseline-gpt-3/diff.patch
 - tests/ changed (auto): no
 - Files changed (auto):
 

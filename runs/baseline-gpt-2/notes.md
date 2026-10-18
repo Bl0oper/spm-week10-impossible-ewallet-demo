@@ -6,7 +6,7 @@
 - Started: 2026-10-16 16:59:04 +08:00
 - Agent CLI exit code: 0
 - Label: other: Codex host was read-only and blocked shell commands
-- Diff: runs/baseline-gpt-2.diff
+- Diff: runs/baseline-gpt-2/diff.patch
 - tests/ changed (auto): no
 - Files changed (auto):
 

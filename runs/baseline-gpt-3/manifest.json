@@ -1,0 +1,22 @@
+{
+  "run_id": "baseline-gpt-3",
+  "runner": "codex",
+  "model": "gpt-6-luna",
+  "prompt_kind": "baseline",
+  "started": "2026-10-16T17:12:51+08:00",
+  "status": "completed",
+  "label": "other: Codex resolved to read-only and blocked workspace inspection",
+  "agent_exit_code": 0,
+  "sandbox_preflight": "failed after CLI start (reported read-only)",
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL"
+    },
+    "heldout": {
+      "result": "FAIL"
+    }
+  },
+  "historical": true
+}
