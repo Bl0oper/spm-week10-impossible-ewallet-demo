@@ -124,7 +124,7 @@ class CliArgsTests(unittest.TestCase):
         self.assertIn("--dangerously-skip-permissions", claude)
         self.assertEqual((claude[-1], claude_stdin), ("prompt", None))
         agy, _ = runner.cli_args("agy", "gemini-x", "medium", Path("t"), Path("a"), "prompt")
-        self.assertEqual(agy[:2], ["-p", "prompt"])
+        self.assertEqual(agy[-2:], ["-p", "prompt"])  # flags must come before the prompt
         self.assertEqual(agy[agy.index("--effort") + 1], "medium")
         self.assertIn("--dangerously-skip-permissions", agy)
 
@@ -162,6 +162,15 @@ class CliArgsTests(unittest.TestCase):
             with patch.object(runner.shutil, "which", return_value=None), patch.object(runner.Path, "home", return_value=Path(temp)):
                 self.assertIn("2.1.301", runner.find_cli("claude"))
 
+    def test_agy_is_found_where_its_installer_puts_it_before_a_terminal_restart(self):
+        with tempfile.TemporaryDirectory() as temp:
+            binary = Path(temp) / "agy" / "bin" / "agy.exe"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("", encoding="utf-8")
+            with patch.object(runner.shutil, "which", return_value=None), \
+                    patch.dict("os.environ", {"LOCALAPPDATA": temp}), patch.object(runner.Path, "home", return_value=Path(temp)):
+                self.assertEqual(runner.find_cli("agy"), str(binary))
+
 
 class PatchAndCopyTests(unittest.TestCase):
     def test_patch_rules(self):
@@ -188,6 +197,16 @@ class PatchAndCopyTests(unittest.TestCase):
                 for name in archive.namelist():
                     self.assertNotIn(b"[demo note]", archive.read(name), name)
             self.assertIn("[demo note]", (root / "ewallet" / "wallet.py").read_text(encoding="utf-8"))
+
+    def test_demo_apply_strips_notes_only_from_the_files_a_patch_touches(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_task_root(temp)
+            patch_file = Path(temp) / "special.diff"
+            patch_file.write_text("# header like examples/special_case.diff\n\n" + agent_patch(root, Path(temp) / "w"),
+                                  encoding="utf-8")
+            self.assertEqual(runner.apply_demo(str(patch_file), root), ["ewallet/wallet.py"])
+            self.assertIn("return amount > 0", (root / "ewallet" / "wallet.py").read_text(encoding="utf-8"))
+            self.assertIn("[demo note]", (root / "tests" / "test_wallet.py").read_text(encoding="utf-8"))
 
     def test_checks_run_on_a_throwaway_copy(self):
         with tempfile.TemporaryDirectory() as temp:

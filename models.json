@@ -1,10 +1,10 @@
 {
   "about": "The models a batch runs. Every teammate's program reads this file from GitHub's main, so a change here reaches everyone without pulling. Each model gets a one-word test first, and models an account can't use are skipped.",
-  "checked": "2026-10-19",
+  "checked": "2026-10-20",
   "sources": {
-    "claude": "https://code.claude.com/docs/en/model-config (aliases always mean the newest model; the run records the exact model used)",
-    "codex": "https://learn.chatgpt.com/docs/models (recommended Codex models) and the config reference (model_reasoning_effort)",
-    "agy": "https://antigravity.google/docs/cli/headless/ (--model, --effort low|medium|high, `agy models`)"
+    "claude": "https://code.claude.com/docs/en/model-config: aliases always mean the newest model (the run records the exact model used); 5.5 models and Fable 5.1 accept low, medium, high, xhigh, max.",
+    "codex": "https://learn.chatgpt.com/docs/models: gpt-6.1-sol and gpt-6-luna are the recommended Codex models. Luna supports efforts up to max (not ultra); Sol goes from low (Light) to ultra, and max/ultra depend on your settings.",
+    "agy": "agy 1.4.2 `agy --help` (checked 2026-10-20): --effort takes low|medium|high|xhigh|max; `agy models` lists this account's models once signed in. Model names that end in an effort (e.g. -high) fix the effort themselves."
   },
   "cli": {
     "claude": {
@@ -21,7 +21,7 @@
     "agy": {
       "list_models": true,
       "models": ["gemini-4-argon-high", "gemini-3.8-flash-medium"],
-      "efforts": ["low", "medium", "high"]
+      "efforts": ["low", "medium", "high", "xhigh", "max"]
     }
   }
 }

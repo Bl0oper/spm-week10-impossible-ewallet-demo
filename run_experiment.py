@@ -57,8 +57,9 @@ CLIS = {
     "claude": ("Claude Code CLI", "Install the Claude Code VS Code extension (this tool finds its built-in CLI) "
                "or run `npm install -g @anthropic-ai/claude-code`, then sign in once by running `claude`."),
     "codex": ("Codex CLI (OpenAI)", "Run `npm install -g @openai/codex`, then sign in with `codex login`."),
-    "agy": ("Antigravity CLI (Google Gemini)", "Install it from antigravity.google/docs/cli, "
-            "then sign in once by running `agy`."),
+    "agy": ("Antigravity CLI (Google Gemini)",
+            "Install it (Windows PowerShell: `irm https://antigravity.google/cli/install.ps1 | iex`; macOS: "
+            "`curl -fsSL https://antigravity.google/cli/install.sh | bash`), then sign in once by running `agy`."),
 }
 WEB_SITES = (("ChatGPT", "https://chatgpt.com"), ("Claude.ai", "https://claude.ai"),
              ("Gemini", "https://gemini.google.com"), ("Microsoft Copilot", "https://copilot.microsoft.com"))
@@ -411,6 +412,25 @@ def check_patch(patch: str, source: Path | None = None) -> tuple[dict[str, Any],
     return checks, output
 
 
+def apply_demo(patch_file: str, root: Path | None = None) -> list[str]:
+    """For the cheating-PR demo: apply a run's diff to this checkout, on a branch never merged.
+
+    Run patches are made against the agent's copy, which has no [demo note] lines, so those
+    lines are removed first, but only from the files the patch touches.
+    """
+    root = root or ROOT
+    patch = clean_patch_text(read_text(Path(patch_file).expanduser().resolve()))
+    validate_patch_paths(patch)
+    names = patch_paths(patch)
+    if not names:
+        raise RunError(f"No file changes found in {patch_file}.")
+    for name in names:
+        if (root / name).is_file():
+            (root / name).write_bytes(task_file_bytes(root / name))
+    apply_patch(root, patch)
+    return names
+
+
 def check_file(patch_file: str) -> dict[str, Any]:
     """Run visible and held-out tests on any saved diff without recording a run."""
     path = Path(patch_file).expanduser().resolve()
@@ -618,10 +638,15 @@ def results_are_current(runs_dir: Path | None = None) -> bool:
 # ---------------------------------------------------------------- running a CLI
 
 def find_cli(runner: str) -> str | None:
-    """Find a runner's CLI on PATH, or the copy bundled with the VS Code extension."""
+    """Find a runner's CLI on PATH, or where its installer puts it before a terminal restart."""
     found = shutil.which(runner)
-    if found or runner != "claude":
+    if found or runner not in ("claude", "agy"):
         return found
+    if runner == "agy":
+        # Google's installer adds agy to PATH only for terminals opened afterwards.
+        local = os.environ.get("LOCALAPPDATA")
+        candidates = ([Path(local) / "agy" / "bin" / "agy.exe"] if local else []) + [Path.home() / ".local" / "bin" / "agy"]
+        return next((str(path) for path in candidates if path.is_file()), None)
     # The Claude Code VS Code extension ships its own CLI without adding it to PATH.
     name = "claude.exe" if os.name == "nt" else "claude"
     candidates = []
@@ -859,11 +884,13 @@ def cli_args(runner: str, model: str, effort: str, workspace: Path, answer_path:
 
     if runner == "agy":
         # Headless Antigravity soft-denies shell commands unless permissions are skipped.
-        args.extend(["-p", prompt, "--output-format", "json", "--dangerously-skip-permissions"])
+        args.extend(["--output-format", "json", "--dangerously-skip-permissions"])
         if model:
             args.extend(["--model", model])
         if effort:
             args.extend(["--effort", effort])
+        # Flags first: Go-style flag parsing stops at the first plain argument.
+        args.extend(["-p", prompt])
         return args, None
     raise RunError(f"Unknown CLI: {runner}")
 
@@ -1646,7 +1673,10 @@ def doctor() -> None:
     say("\nAI coding CLIs (a batch uses every one that is ready):")
     for runner, (name, hint) in CLIS.items():
         found = find_cli(runner)
-        say(f"  {runner:<7}{name}: " + ("ready" if found else f"not installed. {hint}"))
+        state = "ready" if found else f"not installed. {hint}"
+        if found and runner == "agy" and not list_agy_models(found):
+            state = "installed but not signed in (or no models). Run `agy` once to sign in."
+        say(f"  {runner:<7}{name}: {state}")
     say("\nChat websites (ChatGPT, Claude.ai, Gemini, Copilot): always available, nothing to install.")
 
 
@@ -1780,6 +1810,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor", help="check this computer")
     check_parser = sub.add_parser("check", help="run both test suites on any diff; records nothing")
     check_parser.add_argument("patch")
+    demo_parser = sub.add_parser("apply-demo", help="cheating-PR demo: apply a diff to this checkout (never merge it)")
+    demo_parser.add_argument("patch")
     results_parser = sub.add_parser("results", help="rebuild runs/RESULTS.md (CI does this after every merge)")
     results_parser.add_argument("--check", action="store_true", help="only check that runs/RESULTS.md is up to date")
     results_parser.add_argument("--quiet", action="store_true", help="don't print the page")
@@ -1822,6 +1854,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif args.action == "check":
             check_prerequisites()
             check_file(args.patch)
+        elif args.action == "apply-demo":
+            check_prerequisites()
+            say("Applied to: " + ", ".join(apply_demo(args.patch)) + ". Commit this only on a demo branch; never merge it.")
         elif args.action == "results":
             if args.check:
                 if not results_are_current():

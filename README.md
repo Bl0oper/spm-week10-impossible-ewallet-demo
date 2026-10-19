@@ -25,7 +25,7 @@ The rest of this page writes commands for Windows. On macOS, replace `py -3` wit
 
 ## Way 1: coding CLIs on your computer (runs by itself)
 
-Use this if you have the **Claude Code CLI** (the VS Code extension is enough), the **Codex CLI**, or the **Antigravity CLI** (Gemini). Sign in to each CLI once. Runs use your own account and quota.
+Use this if you have the **Claude Code CLI** (the VS Code extension is enough), the **Codex CLI**, or the **Antigravity CLI** (`agy`, Google's Gemini CLI). Sign in to each CLI once by running it on its own (`claude`, `codex login`, `agy`). Runs use your own account and quota. `doctor` prints the install command for any CLI you don't have.
 
 1. The program finds every CLI you have and tests each model with a one-word question, so models your plan can't use are skipped.
 2. It lists every **model × reasoning effort × prompt** (baseline and strict). For example, 3 Claude models × 5 efforts × 2 prompts = 30 runs.
@@ -125,6 +125,7 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py submit` | Send runs still waiting on this computer. |
 | `py -3 run_experiment.py status` | Show where your runs are. |
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
+| `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
@@ -142,7 +143,7 @@ Passing both suites is not proof of correctness. Read the diff.
 
 - [docs/talk-facts.md](docs/talk-facts.md): where the checks break, with sources
 - [docs/cheating-pr-demo.md](docs/cheating-pr-demo.md): showing `protect-tests` and the held-out check on GitHub
-- [docs/admin-setup.md](docs/admin-setup.md): repository settings the run workflow needs, and protecting `main`
+- [docs/admin-setup.md](docs/admin-setup.md): repository settings the run workflow needs, and why `main` is not protected
 - [docs/presentation/](docs/presentation/): talk track, slide review, and checklist
 
 The EWallet requirement is adapted from IS212 Week 6. MIT licence.

@@ -44,6 +44,6 @@ The presentation currently has 12 visible pages: 1, 3, 4, 5, 7, 9, 10, 12, 14, 1
 
 - Confirm the saved copy still has the original pages hidden and the revised copies visible.
 - Confirm the visible slides contain only one 76% result, with its model, benchmark, and scaffold beside it.
-- Do not present the illustration as a real experiment. The repository currently has no completed model runs.
+- Do not present the illustration as a real experiment. Real runs are in `runs/RESULTS.md`; show those as results.
 - Confirm the speaker notes on pages 3 and 7 still match `SCRIPT.md`: page 3 scopes the METR attempt rate; page 7 explains the separate 2.9% setup.
 - Check the page numbers in Canva before presenting; hidden pages may be reordered later.

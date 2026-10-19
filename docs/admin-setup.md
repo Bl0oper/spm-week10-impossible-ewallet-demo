@@ -2,24 +2,32 @@
 
 ## Settings the run workflow needs
 
-Each run arrives as a `run/<run-id>` branch, and the `run-submitted` workflow opens a PR for it, merges it, and rebuilds `runs/RESULTS.md`. Only a repository admin can change these settings:
+Each run arrives as a `run/<run-id>` branch, and the `run-submitted` workflow opens a PR for it, merges it, and rebuilds `runs/RESULTS.md`. Only a repository admin can change these settings.
 
-1. **Settings → Actions → General → Workflow permissions:** tick **Allow GitHub Actions to create and approve pull requests**, then **Save**. Without it the workflow can't open run PRs, and no run reaches `main`.
-2. **Settings → General → Pull Requests:** tick **Automatically delete head branches**. The workflow already deletes each run branch after merging; this is a backup.
+| Setting | Where | State |
+|---|---|---|
+| **Allow GitHub Actions to create and approve pull requests** | Settings → Actions → General → Workflow permissions | **On** (since 20-10-2026). Required: without it the workflow can't open run PRs. |
+| Workflow permissions: read repository contents | same page | Kept as the default. Each workflow asks for the write access it needs. |
+| Automatically delete head branches | Settings → General → Pull Requests | Off. Not needed: the workflow deletes each run branch after merging. |
 
-## Before protecting `main`
+## Why `main` is not protected
 
-A ruleset that requires an approval and passing checks also applies to the workflow. Its run PRs have no approver, and PRs opened by the workflow don't trigger other checks, so run PRs would stay unmerged and `RESULTS.md` would stop updating. The workflow must be allowed to bypass the ruleset. **Not yet verified:** whether GitHub's ruleset bypass list accepts GitHub Actions for this. Check that before activating the ruleset below.
+**Decision (20-10-2026): `main` stays unprotected.**
 
-## Admin steps
+A ruleset that requires an approval and passing checks would also block the run workflow. Its PRs have no approver, and PRs opened by the workflow's token don't trigger other checks. GitHub's ruleset bypass list accepts repository roles, teams, GitHub Apps and Dependabot, but not the workflow's own token ([GitHub docs](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)). Protecting `main` would therefore need a dedicated GitHub App that the workflow signs in as, and that app added to the bypass list. That is more setup than this class project needs.
 
-GitHub says repository admins or custom roles with **edit repository rules** can create rulesets; see its [ruleset setup guide](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository) and [available rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets).
+What this means:
 
-1. Open the repository on GitHub, then go to **Settings → Rules → Rulesets → New branch ruleset**.
-2. Name it `protect-main`, target the `main` branch, and set enforcement to **Active**. Add only the run workflow to the bypass list (see above).
-3. Enable **Require a pull request before merging** and require at least **1 approval**. GitHub supports approval-count requirements in rulesets. The current PR author cannot approve their own pull request, so another repository user with write access must review it.
-4. Require `protect-tests` and all three `runner-tests (ubuntu-latest)`, `runner-tests (windows-latest)`, and `runner-tests (macos-latest)` checks. Keep the `tests` check visible but optional: the starter wallet is deliberately unfinished, so its visible tests fail by design.
-5. Enable the rules to prevent force pushes and branch deletion, then save the ruleset.
-6. Confirm the rule appears in **Settings → Rules → Rulesets** with `main` as its target. Then open a small test PR and check that it can't merge without an approval and passing checks.
+- **A red check is only a warning.** PR #2 changed `tests/`, `protect-tests` went red, and it was still merged. The talk can show this as a place where the checks break.
+- **Run PRs are safe to auto-merge** because the workflow only accepts a branch that adds its own `runs/<run-id>/` folder, and it judges the run with `main`'s code, not the branch's.
+- **Never merge the cheating-PR demo PRs.** Nothing stops it except people.
 
-The existing `CODEOWNERS` file covers `/tests/` and `/.github/`. Once branch rules enforce code-owner review, any change under `/.github/` will request an owner review. Do not bypass the rule or merge directly to `main` by hand.
+## If `main` must be protected later
+
+1. Create a GitHub App with **Contents: read and write** and **Pull requests: read and write**, and install it on this repository.
+2. Store its app ID as a repository variable and its private key as a repository secret.
+3. Change both run workflows to get a token for the app and use it instead of `github.token` for checkout, `gh pr create`, `gh pr merge` and the `RESULTS.md` push. PRs opened with an app token also trigger the normal checks.
+4. Create a branch ruleset for `main` (Settings → Rules → Rulesets): require a pull request with 1 approval, require `protect-tests` and the three `runner-tests` checks (keep `tests` optional: it fails by design), block force pushes and deletion, and add **only the app** to the bypass list.
+5. Submit one cheap run and check that it still merges by itself.
+
+`.github/CODEOWNERS` covers `/tests/` and `/.github/`. It only takes effect once a ruleset requires code-owner review.
