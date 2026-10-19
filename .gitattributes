@@ -1,5 +1,4 @@
 * text=auto
-*.ps1 text eol=crlf
 # Saved patches need LF on every platform so `git apply` can read them.
 *.diff text eol=lf
 *.patch text eol=lf

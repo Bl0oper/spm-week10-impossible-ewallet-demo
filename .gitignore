@@ -18,6 +18,3 @@ runner_tests/__pycache__/
 .claude/settings.local.json
 Thumbs.db
 .DS_Store
-
-# Generated from per-run manifests; each run folder is the shareable record.
-/runs/RESULTS.md

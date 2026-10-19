@@ -18,5 +18,6 @@
       "result": "FAIL"
     }
   },
-  "historical": true
+  "historical": true,
+  "excluded": "Tool failure: the Codex sandbox was read-only, so the agent could not work on the task."
 }
