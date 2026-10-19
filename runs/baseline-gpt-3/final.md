@@ -1,1 +1,0 @@
-I can’t implement or run the tests in this session because the workspace is mounted read-only. Even a read-only directory listing was rejected by the command policy, so I can’t inspect SPEC.md or the code either. Please reopen the workspace with write access; then I can implement withdrawal and run python -m unittest.
