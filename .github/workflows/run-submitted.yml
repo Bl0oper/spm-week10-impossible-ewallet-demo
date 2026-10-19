@@ -1,0 +1,75 @@
+name: run-submitted
+
+# A teammate's program pushed one run on a run/<run-id> branch made from main.
+# This job checks the run with main's own code (not the branch's), labels it by fixed
+# rules, opens a PR, merges it, and then rebuilds runs/RESULTS.md. It is all one workflow
+# because PRs opened by this bot do not start other workflows.
+on:
+  push:
+    branches: ["run/**"]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  label-and-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the run branch
+        uses: actions/checkout@v5
+        with:
+          path: branch
+          fetch-depth: 0
+      - name: Check out main's code, which is what judges the run
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          path: trusted
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Check the branch, re-run both test suites, and label the run
+        id: verify
+        run: python trusted/run_experiment.py ci-verify --repo branch --branch "$GITHUB_REF_NAME" --out "$RUNNER_TEMP/pr"
+      - name: Open the PR, record its link, and merge it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.verify.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          branch="$GITHUB_REF_NAME"
+          url=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --state open --json url --jq '.[0].url // empty')
+          if [ -z "$url" ]; then
+            url=$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" \
+              --title "$(cat "$RUNNER_TEMP/pr/pr-title.txt")" --body-file "$RUNNER_TEMP/pr/pr-body.md")
+          fi
+          python trusted/run_experiment.py ci-record-pr "branch/runs/$RUN_ID" "$url"
+          cd branch
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "runs/$RUN_ID"
+          git commit --quiet -m "CI result for $RUN_ID"
+          git push --quiet origin "HEAD:$branch"
+          cd ..
+          # GitHub may need a moment to see the new commit before it allows the merge.
+          for attempt in 1 2 3 4 5; do
+            if gh pr merge "$url" --repo "$GITHUB_REPOSITORY" --squash --delete-branch \
+                --subject "$(cat "$RUNNER_TEMP/pr/pr-title.txt")"; then
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "::error::Could not merge $url. Open it and press Merge, or re-run this workflow."
+          exit 1
+
+  results:
+    needs: label-and-merge
+    uses: ./.github/workflows/rebuild-results.yml
+    permissions:
+      contents: write

@@ -2,6 +2,8 @@ name: tests
 
 on:
   push:
+    # Run branches only add a run folder; run-submitted checks them instead.
+    branches-ignore: ["run/**"]
   pull_request:
 
 permissions:

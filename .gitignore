@@ -12,6 +12,9 @@ htmlcov/
 .pytest_cache/
 runner_tests/__pycache__/
 
+# Runs waiting on this computer before they are submitted
+pending/
+
 # Editors / local tools
 .vscode/
 .idea/

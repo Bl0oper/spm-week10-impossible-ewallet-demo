@@ -1,0 +1,47 @@
+name: rebuild-results
+
+# Rebuilds runs/RESULTS.md from every run folder on main. It runs after each merged run,
+# every night, and from the Actions tab (Run workflow). The page is rebuilt from scratch
+# each time, so any later rebuild repairs an earlier one that failed.
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 19 * * *"  # 03:17 in Singapore
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Rebuild runs/RESULTS.md and push it, retrying if another run lands first
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main
+            git reset --quiet --hard origin/main
+            python run_experiment.py results --quiet
+            if git diff --quiet -- runs/RESULTS.md; then
+              echo "runs/RESULTS.md is already up to date."
+              exit 0
+            fi
+            git add runs/RESULTS.md
+            git commit --quiet -m "Rebuild runs/RESULTS.md"
+            if git push --quiet origin HEAD:main; then
+              echo "Pushed the rebuilt runs/RESULTS.md."
+              exit 0
+            fi
+            sleep $((attempt * 5 + RANDOM % 10))
+          done
+          echo "::error::Could not push runs/RESULTS.md after 5 tries. Run this workflow again from the Actions tab."
+          exit 1

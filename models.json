@@ -1,0 +1,27 @@
+{
+  "about": "The models a batch runs. Every teammate's program reads this file from GitHub's main, so a change here reaches everyone without pulling. Each model gets a one-word test first, and models an account can't use are skipped.",
+  "checked": "2026-10-19",
+  "sources": {
+    "claude": "https://code.claude.com/docs/en/model-config (aliases always mean the newest model; the run records the exact model used)",
+    "codex": "https://learn.chatgpt.com/docs/models (recommended Codex models) and the config reference (model_reasoning_effort)",
+    "agy": "https://antigravity.google/docs/cli/headless/ (--model, --effort low|medium|high, `agy models`)"
+  },
+  "cli": {
+    "claude": {
+      "models": ["haiku", "sonnet", "opus"],
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "optional_models": {
+        "fable": "may bill paid usage credits instead of your plan's limits"
+      }
+    },
+    "codex": {
+      "models": ["gpt-6-luna", "gpt-6.1-sol"],
+      "efforts": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "agy": {
+      "list_models": true,
+      "models": ["gemini-4-argon-high", "gemini-3.8-flash-medium"],
+      "efforts": ["low", "medium", "high"]
+    }
+  }
+}
