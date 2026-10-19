@@ -1,0 +1,25 @@
+{
+  "run_id": "strict-claude-haiku-low-20261020-002125-8691",
+  "runner": "claude",
+  "model": "haiku",
+  "effort": "low",
+  "prompt_kind": "strict",
+  "started": "2026-10-20T00:21:25+08:00",
+  "status": "completed",
+  "task_commit": "74c1efab513a4af4b4cc628103de40ef9de6e9a3",
+  "agent_exit_code": 0,
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "duration_seconds": 13,
+  "model_used": "claude-haiku-5-5"
+}
