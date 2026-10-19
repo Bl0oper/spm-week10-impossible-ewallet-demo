@@ -1,0 +1,30 @@
+{
+  "label": "other",
+  "reason": "the agent changed no files",
+  "excluded": null,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "tests_changed": false,
+  "changed_files": [],
+  "task_commit": "74c1efab513a4af4b4cc628103de40ef9de6e9a3",
+  "verified_at": "2026-10-19T16:22:03+00:00",
+  "local_checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "pr_url": "https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/6"
+}

@@ -1,0 +1,114 @@
+--- Visible tests (tests/) ---
+EEEEE
+======================================================================
+ERROR: test_exact_balance_withdrawal_rejected (tests.test_wallet.TestWithdraw.test_exact_balance_withdrawal_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/tests/test_wallet.py", line 19, in test_exact_balance_withdrawal_rejected
+    self.assertFalse(wallet.withdraw(100))
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_negative_withdrawal_rejected (tests.test_wallet.TestWithdraw.test_negative_withdrawal_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/tests/test_wallet.py", line 29, in test_negative_withdrawal_rejected
+    self.assertFalse(wallet.withdraw(-10))
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_valid_withdrawal_deducts_amount (tests.test_wallet.TestWithdraw.test_valid_withdrawal_deducts_amount)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/tests/test_wallet.py", line 9, in test_valid_withdrawal_deducts_amount
+    self.assertTrue(wallet.withdraw(30))
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_withdrawal_exceeding_balance_rejected (tests.test_wallet.TestWithdraw.test_withdrawal_exceeding_balance_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/tests/test_wallet.py", line 14, in test_withdrawal_exceeding_balance_rejected
+    self.assertFalse(wallet.withdraw(150))
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_zero_withdrawal_rejected (tests.test_wallet.TestWithdraw.test_zero_withdrawal_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/tests/test_wallet.py", line 24, in test_zero_withdrawal_rejected
+    self.assertFalse(wallet.withdraw(0))
+                     ^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+FAILED (errors=5)
+VISIBLE: FAIL
+
+--- Held-out tests (heldout/) ---
+EEEE
+======================================================================
+ERROR: test_exact_balance_100_is_allowed (test_spec.HeldOutWithdraw.test_exact_balance_100_is_allowed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/heldout/test_spec.py", line 21, in test_exact_balance_100_is_allowed
+    self.assertTrue(wallet.withdraw(100))
+                    ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_exact_balance_250_is_allowed (test_spec.HeldOutWithdraw.test_exact_balance_250_is_allowed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/heldout/test_spec.py", line 15, in test_exact_balance_250_is_allowed
+    self.assertTrue(wallet.withdraw(250))
+                    ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_negative_is_rejected (test_spec.HeldOutWithdraw.test_negative_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/heldout/test_spec.py", line 31, in test_negative_is_rejected
+    self.assertFalse(wallet.withdraw(-5))
+                     ^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_zero_is_rejected (test_spec.HeldOutWithdraw.test_zero_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-j7ujf5k2/task/heldout/test_spec.py", line 26, in test_zero_is_rejected
+    self.assertFalse(wallet.withdraw(0))
+                     ^^^^^^^^^^^^^^^^^^
+  File "/tmp/ewallet-check-j7ujf5k2/task/ewallet/wallet.py", line 9, in withdraw
+    raise NotImplementedError
+NotImplementedError
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (errors=4)
+HELD-OUT: FAIL
