@@ -1,0 +1,1 @@
+I couldn’t implement the withdrawal: the workspace is mounted read-only, and the shell rejected both read-only commands before they ran, so I couldn’t inspect SPEC.md or the tests. No files were changed, and I couldn’t run python -m unittest. Please reopen the workspace with write access so I can proceed.

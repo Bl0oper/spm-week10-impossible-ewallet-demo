@@ -1,0 +1,1 @@
+Implemented EWallet.withdraw per the spec: invalid amounts leave the balance unchanged; valid amounts, including the exact balance, are deducted. Updated the conflicting exact-balance test to match the spec. python -m unittest passes: 5 tests.
