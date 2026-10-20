@@ -363,7 +363,7 @@ def apply_patch(workspace: Path, patch: str) -> None:
     validate_patch_paths(patch)
     if not patch.strip():
         return
-    with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".patch", delete=False) as handle:
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", suffix=".patch", delete=False) as handle:
         patch_path = Path(handle.name)
         handle.write(patch)
     try:
@@ -426,7 +426,12 @@ def apply_demo(patch_file: str, root: Path | None = None) -> list[str]:
         raise RunError(f"No file changes found in {patch_file}.")
     for name in names:
         if (root / name).is_file():
-            (root / name).write_bytes(task_file_bytes(root / name))
+            data = task_file_bytes(root / name)
+            # Agent workspaces use Git's canonical LF form. Normalise a touched text file after removing
+            # its human-only note so that the saved agent diff also applies on Unix hosts.
+            if Path(name).suffix in (".py", ".md"):
+                data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+            (root / name).write_bytes(data)
     apply_patch(root, patch)
     return names
 
