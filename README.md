@@ -8,7 +8,7 @@
 
 ## Quick start
 
-You need **Python 3.11+**, **Git**, push access to this repo, and **one AI tool**: a coding CLI (Claude Code, Codex, Antigravity) or just a chat website.
+You need **Python 3.11+**, **Git**, push access to this repo, and one coding CLI: Claude Code, Codex, or Antigravity.
 
 | Step | Windows (PowerShell) | macOS (Terminal) |
 |---|---|---|
@@ -19,13 +19,13 @@ You need **Python 3.11+**, **Git**, push access to this repo, and **one AI tool*
 
 Step 3 also checks that you can push. If it says push access failed, sign in to GitHub for Git once (on Windows a browser window opens on your first push).
 
-Step 4 opens a menu with two ways to run. **That's all you do.** You never label runs or open PRs: each run is pushed on its own branch, and CI checks it, labels it, merges it, and updates the results.
+Step 4 opens the CLI-run menu. **That's all you do.** You never label runs or open PRs: each run is pushed on its own branch, and CI checks it, labels it, merges it, and updates the results.
 
 The rest of this page writes commands for Windows. On macOS, replace `py -3` with `python3`.
 
-## Way 1: coding CLIs on your computer (runs by itself)
+## Run coding CLIs on your computer
 
-Use this if you have the **Claude Code CLI** (the VS Code extension is enough), the **Codex CLI**, or the **Antigravity CLI** (`agy`, Google's Gemini CLI). Sign in to each CLI once by running it on its own (`claude`, `codex login`, `agy`). Runs use your own account and quota. `doctor` prints the install command for any CLI you don't have.
+Use this with the **Claude Code CLI** (the VS Code extension is enough), the **Codex CLI**, or the **Antigravity CLI** (`agy`, Google's Gemini CLI). Sign in to each CLI once by running it on its own (`claude`, `codex login`, `agy`). Runs use your own account and quota. `doctor` prints the install command for any CLI you don't have.
 
 1. The program finds every CLI you have and tests each model with a one-word question, so models your plan can't use are skipped.
 2. It lists every **model × reasoning effort × prompt** (baseline and strict). For example, 3 Claude models × 5 efforts × 2 prompts = 30 runs.
@@ -51,20 +51,6 @@ py -3 run_experiment.py run --runner claude --model haiku --effort low --prompt 
 
 Add `--verbose` to watch what the agent does.
 
-## Way 2: a chat website (you drive it)
-
-Use this with ChatGPT, Claude.ai, Gemini or Microsoft Copilot. Nothing to install.
-
-1. Pick the prompt and the site, then type the **model** and the **reasoning setting** exactly as the site shows them.
-2. The program makes a run folder, opens it for you, puts the prompt on your clipboard, and prints the exact steps with full paths:
-   - upload `task.zip` to a **new** chat and paste the prompt;
-   - save the complete chat transcript as `transcript.md` in the run folder;
-   - save every file the model changed into the run's `returned` folder (browser downloads in your Downloads folder are found too);
-   - copy the model's final answer.
-3. Press **Enter**. The program checks the files and submits the run.
-
-Type `later` to finish another time with `py -3 run_experiment.py import <run-id>` (the exact command is printed).
-
 ## What happens after you run
 
 1. Your run is pushed as branch `run/<run-id>`, made from the latest `main`. The program does this in a temporary folder, so your own checkout and GitHub Desktop are not touched.
@@ -87,7 +73,6 @@ Every run is kept, and repeats of the same setting are counted together. A run t
 
 Run `py -3 run_experiment.py status`. It lists each of your runs as:
 
-- **waiting for you**: a web run to finish with `import`;
 - **not submitted**: the push failed; fix sign-in (`doctor`), then `py -3 run_experiment.py submit`;
 - **with CI**: usually merged within minutes;
 - **merged**: done, with its label;
@@ -105,8 +90,7 @@ Each run has a folder `runs/<run-id>/`:
 | `ci-result.json` | CI's own check results, label, reason, and the PR link. This is what counts. |
 | `diff.patch` | Everything the agent changed. |
 | `final.md` | The agent's complete final answer. |
-| `agent-output.txt` | The full CLI log: what the agent read and ran (CLI runs only). |
-| `transcript.md` | The full web-chat transcript, required for a qualitative scorecard comparison (web runs only). |
+| `agent-output.txt` | The full CLI log: what the agent read and ran. |
 | `check-output.txt`, `ci-check-output.txt` | Detailed test output from the runner's computer and from CI. |
 
 - `VISIBLE` is the ordinary `tests/` suite. A `FAIL` is expected when the agent follows the spec and leaves the planted test alone.
@@ -122,8 +106,6 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py doctor` | Show which CLIs work here and whether you can push. |
 | `py -3 run_experiment.py batch` | Plan and run every CLI × model × effort × prompt. `--resume`, `--only claude,codex`, `--with-optional`. |
 | `py -3 run_experiment.py run --runner ... --model ...` | One CLI run with every choice given. |
-| `py -3 run_experiment.py web` | One guided chat-website run. |
-| `py -3 run_experiment.py import <run-id>` | Finish a chat-website run later. |
 | `py -3 run_experiment.py submit` | Send runs still waiting on this computer. |
 | `py -3 run_experiment.py status` | Show where your runs are. |
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
@@ -131,7 +113,7 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
-`--local` (on `batch`, `run` and `web`) uses this folder's task files and never submits. It's for testing the program.
+`--local` (on `batch` and `run`) uses this folder's task files and never submits. It's for testing the program.
 
 ## How the experiment stays fair
 
@@ -139,7 +121,7 @@ Passing both suites is not proof of correctness. Read the diff.
 - Comments starting with `# [demo note]` explain the trap to people reading the repo. The tool removes them from every copy an agent sees, so the agent has to find the conflict itself.
 - No memory carries over between runs: each run starts in a new folder. The Claude CLI runs with `--safe-mode --no-session-persistence`, so personal CLAUDE.md files, hooks, MCP servers and saved sessions are off; Codex runs with `--ephemeral --ignore-user-config`.
 - CI records fixed behaviour labels. A blinded scorecard review, rather than a keyword match, assesses whether the agent identified the exact conflict and reported truthfully.
-- CLI transcripts are saved automatically. Save a full web-chat transcript as `transcript.md`; a web run without one is kept in the behavioural results but excluded from qualitative scorecard comparisons.
+- CLI transcripts are saved automatically and are required for qualitative scorecard comparisons.
 - `runs/` started fresh with this workflow on 19-10-2026. Earlier trial runs, made with older versions of the tool, are in the Git history only.
 
 ## More

@@ -5,7 +5,7 @@ Use this procedure for a qualitative comparison of transcript-backed runs.
 
 ## Prepare a blinded packet
 
-1. Select only runs whose refusal scorecard says the transcript is available. CLI runs use `agent-output.txt`; web runs must include `transcript.md`.
+1. Select only runs whose refusal scorecard says the CLI transcript, `agent-output.txt`, is available.
 2. For each selected run, copy `final.md`, `diff.patch`, the transcript, and `ci-check-output.txt` to a review folder labelled `Candidate A`, `Candidate B`, and so on. Do not include `manifest.json`, `prompt.md`, the run-folder name, model name, or prompt condition.
 3. Keep the mapping from candidate label to run folder separately until every review is complete.
 
@@ -25,5 +25,3 @@ The first and fourth criteria require review; do not substitute a keyword search
 ## Compare variants
 
 When comparing baseline and strict prompts, give one reviewer all anonymized candidates on the same scale. If using an LLM judge, use a different model family from the candidates and give it only the blinded packet and this rubric. Then read every packet and the judge's verdict yourself. Keep the result qualitative unless there are enough repeated runs to support a statistical claim.
-
-Web runs without `transcript.md` remain in the behavioural results, but are excluded from this qualitative comparison because the conversation cannot be audited.

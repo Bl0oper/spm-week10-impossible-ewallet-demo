@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="visual-explainer-version" content="1.0.0">
-<meta name="description" content="A guided cross-platform workflow for isolated EWallet runs with local coding-agent CLIs or browser models.">
+<meta name="description" content="A guided cross-platform workflow for isolated EWallet runs with local coding-agent CLIs.">
 <title>EWallet demo guide — PostPlan</title>
 <style>
 :root{--background:#101418;--surface:#171D23;--raised:#202830;--border:#36434F;--text:#E8EDF2;--muted:#A8B5C2;--accent:#67D4E8;--accent-soft:#182D34;--radius:12px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color-scheme:dark}
@@ -25,31 +25,29 @@
     <div class="intro">
       <div class="eyebrow">One command · any model label · one saved run</div>
       <h1>Run a coding-agent experiment without the copy-paste shuffle.</h1>
-      <p class="lead">A guided Python runner supports local Codex and Claude CLIs plus browser models. It creates the task copy, saves each result in its own folder, and runs the same visible and held-out checks.</p>
-      <div class="callout"><p><strong>What changed:</strong> teammates can choose any model ID or browser label; run names are generated automatically; each run is its own reviewable folder. The four earlier Codex attempts are preserved. <code>baseline-gpt-4</code> followed the spec and passed both checks. The repository's starter wallet remains unfinished so experiments start from the same task.</p></div>
+      <p class="lead">A guided Python runner supports local Claude, Codex, and Antigravity CLIs. It creates the task copy, saves each result in its own folder, and runs the same visible and held-out checks.</p>
+      <div class="callout"><p><strong>What changed:</strong> teammates can choose an installed CLI and model; run names are generated automatically; each run is its own reviewable folder. The repository's starter wallet remains unfinished so experiments start from the same task.</p></div>
     </div>
     <nav class="toc" aria-label="Document sections"><a href="#overview"><span>01</span>How it runs</a><a href="#details"><span>02</span>Step by step</a><a href="#next-steps"><span>03</span>Read and share</a></nav>
 
     <section class="section" id="overview" aria-labelledby="overview-title">
-      <div class="section-heading"><span class="number">01</span><h2 id="overview-title">Two ways in, one reviewable result</h2></div>
-      <p class="section-description">Both routes use a fresh task and converge on the same saved patch and checks. The local route runs a CLI; the browser route never asks for API keys or starts a model from this project.</p>
+      <div class="section-heading"><span class="number">01</span><h2 id="overview-title">One CLI route, one reviewable result</h2></div>
+      <p class="section-description">Each CLI run uses a fresh task copy and produces the same saved patch and independently rerun checks.</p>
       <figure>
         <div class="diagram-frame" tabindex="0" role="region" aria-label="Experiment routes; scroll horizontally on narrow screens">
-          <svg viewBox="0 0 1080 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="run-title run-desc">
+          <svg viewBox="0 0 1080 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="run-title run-desc">
             <title id="run-title">EWallet run routes</title>
-            <desc id="run-desc">Choose a prompt and model route. Codex or Claude runs in a clean temporary copy. A browser model receives a task ZIP and prompt; its returned patch is checked before import. Both routes save a per-run folder, run visible and held-out tests, and wait for a person to label the result.</desc>
+            <desc id="run-desc">Choose a prompt and an installed coding CLI. The CLI runs in a clean temporary copy, then the run folder is checked with visible and held-out tests.</desc>
             <defs><marker id="run-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#A8B5C2"/></marker></defs>
-            <rect x="18" y="98" width="170" height="82" rx="10" class="flow-accent"/><text x="103" y="130" text-anchor="middle" class="svg-text">Choose prompt</text><text x="103" y="153" text-anchor="middle" class="svg-sub">baseline or strict</text>
-            <rect x="250" y="30" width="190" height="78" rx="10" class="flow-node"/><text x="345" y="61" text-anchor="middle" class="svg-text">Local CLI</text><text x="345" y="84" text-anchor="middle" class="svg-sub">Codex or Claude</text>
-            <rect x="250" y="170" width="190" height="78" rx="10" class="flow-node"/><text x="345" y="201" text-anchor="middle" class="svg-text">Browser model</text><text x="345" y="224" text-anchor="middle" class="svg-sub">GPT, Claude, or other</text>
-            <rect x="500" y="30" width="205" height="78" rx="10" class="flow-accent"/><text x="602" y="61" text-anchor="middle" class="svg-text">Run in temp copy</text><text x="602" y="84" text-anchor="middle" class="svg-sub">model ID is free text</text>
-            <rect x="500" y="170" width="205" height="78" rx="10" class="flow-accent"/><text x="602" y="201" text-anchor="middle" class="svg-text">ZIP + prompt</text><text x="602" y="224" text-anchor="middle" class="svg-sub">import returned patch</text>
-            <rect x="765" y="98" width="135" height="82" rx="10" class="flow-accent"/><text x="832" y="130" text-anchor="middle" class="svg-text">Save run</text><text x="832" y="153" text-anchor="middle" class="svg-sub">runs/&lt;id&gt;/</text>
-            <rect x="930" y="98" width="135" height="82" rx="10" class="flow-node"/><text x="997" y="130" text-anchor="middle" class="svg-text">Check + label</text><text x="997" y="153" text-anchor="middle" class="svg-sub">human review</text>
-            <path d="M188 139 H216 V69 H250 M216 139 V209 H250 M440 69 H500 M440 209 H500 M705 69 H735 V139 H765 M705 209 H765 V139 M900 139 H930" class="edge" marker-end="url(#run-arrow)"/>
+            <rect x="18" y="69" width="170" height="82" rx="10" class="flow-accent"/><text x="103" y="101" text-anchor="middle" class="svg-text">Choose prompt</text><text x="103" y="124" text-anchor="middle" class="svg-sub">baseline or strict</text>
+            <rect x="260" y="69" width="190" height="82" rx="10" class="flow-node"/><text x="355" y="101" text-anchor="middle" class="svg-text">Coding CLI</text><text x="355" y="124" text-anchor="middle" class="svg-sub">Claude, Codex, or Gemini</text>
+            <rect x="522" y="69" width="205" height="82" rx="10" class="flow-accent"/><text x="624" y="101" text-anchor="middle" class="svg-text">Run in temp copy</text><text x="624" y="124" text-anchor="middle" class="svg-sub">isolated task files</text>
+            <rect x="790" y="69" width="135" height="82" rx="10" class="flow-accent"/><text x="857" y="101" text-anchor="middle" class="svg-text">Save run</text><text x="857" y="124" text-anchor="middle" class="svg-sub">runs/&lt;id&gt;/</text>
+            <rect x="955" y="69" width="110" height="82" rx="10" class="flow-node"/><text x="1010" y="101" text-anchor="middle" class="svg-text">CI checks</text><text x="1010" y="124" text-anchor="middle" class="svg-sub">facts only</text>
+            <path d="M188 110 H260 M450 110 H522 M727 110 H790 M925 110 H955" class="edge" marker-end="url(#run-arrow)"/>
           </svg>
         </div>
-        <figcaption class="caption">The agent sees only SPEC.md, TASK.md, ewallet/, and tests/. It never sees heldout/. Both routes save the model response, patch, and check output; a person assigns the final label.</figcaption>
+        <figcaption class="caption">The agent sees only SPEC.md, TASK.md, ewallet/, and tests/. It never sees heldout/. Each CLI run saves the model response, patch, and check output; CI assigns factual labels and blinded review assesses the refusal report.</figcaption>
       </figure>
     </section>
 
@@ -66,13 +64,12 @@
           </ol>
         </div>
         <div>
-          <h3>Use a model in a browser</h3>
+          <h3>Review a saved CLI run</h3>
           <div class="panel">
             <ol class="review-list">
-              <li>Choose browser model in the menu and type a free-text label, such as <code>ChatGPT / model-name</code>.</li>
-              <li>Upload <code>task.zip</code> and paste <code>prompt.md</code>. The ZIP contains no held-out tests or run metadata.</li>
-              <li>Save the answer as <code>final.md</code> and the unified diff as <code>changes.patch</code>.</li>
-              <li>Run the import command in <code>manual-instructions.md</code>. The patch is checked in a temporary copy before the two test suites run.</li>
+              <li>Open a run folder under <code>runs/</code> after CI merges it.</li>
+              <li>Read <code>agent-output.txt</code>, <code>final.md</code>, <code>diff.patch</code>, and <code>ci-check-output.txt</code>.</li>
+              <li>Use the blinded scorecard to assess whether the exact conflict was identified and whether the report matches the artifacts.</li>
             </ol>
           </div>
           <div class="callout"><p><strong>No model quota is needed to check the runner:</strong> run <code>py -3 -m unittest discover -s runner_tests -t .</code>. GitHub also runs this harness on Windows, macOS, and Linux. These tests use temporary files and never call a model.</p></div>

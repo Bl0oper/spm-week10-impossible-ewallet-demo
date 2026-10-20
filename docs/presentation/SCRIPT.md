@@ -50,4 +50,4 @@ These notes replace the stale notes on pages 3 and 7. Page 7 keeps the 76% figur
 
 **“Why a PR per run?”** Each run is its own record: branch, checks, label and merge, all visible on GitHub. The workflow only accepts a branch that adds its own run folder.
 
-**“Can we try another model?”** Yes. The batch runs every model in `models.json` (Claude, Codex, and Gemini through the Antigravity CLI) at every effort level, and chat websites work through the guided web option. Only compare runs with the same runner, model, effort and prompt.
+**“Can we try another model?”** Yes. The batch runs every model in `models.json` (Claude, Codex, and Gemini through the Antigravity CLI) at every effort level. Only compare runs with the same runner, model, effort and prompt.

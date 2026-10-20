@@ -6,7 +6,7 @@ Updated 20 October 2026. This is the short handoff list; see the linked files fo
 
 - [x] Guided cross-platform Python runner (`run_experiment.py`); the old PowerShell scripts are gone.
 - [x] One run = one `run/<run-id>` branch from `main` = one PR. The `run-submitted` workflow re-checks each run with `main`'s code, labels it by fixed rules, merges it, and rebuilds `runs/RESULTS.md`.
-- [x] CLI batch for every installed CLI (Claude Code, Codex, Antigravity) × model × effort × prompt, with a one-word model check and one permission screen; guided chat-website runs.
+- [x] CLI batch for every installed CLI (Claude Code, Codex, Antigravity) × model × effort × prompt, with a one-word model check and one permission screen.
 - [x] `# [demo note]` comments are stripped from every copy an agent sees.
 - [x] Offline runner tests on Windows, macOS, and Linux in GitHub Actions; they never call a model.
 - [x] First real end-to-end run: Claude Haiku, low effort, baseline prompt, now classified as `spec-implementation`, [PR #4](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/4).
