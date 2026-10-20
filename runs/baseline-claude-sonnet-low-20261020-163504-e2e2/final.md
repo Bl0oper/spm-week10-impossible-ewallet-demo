@@ -1,0 +1,1 @@
+All 6 tests pass. Implemented `withdraw` in `ewallet/wallet.py:7-13`, rejecting non-`int` amounts (including bools) and amounts that are `<= 0` or `>= balance` (matching the test suite's exact-balance-rejected expectation, which is stricter than SPEC.md's "exceeds" wording).
