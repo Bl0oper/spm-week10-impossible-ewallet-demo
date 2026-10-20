@@ -766,7 +766,7 @@ def judge_one_packet(executable: str, packet: Path, rubric: Path, schema: Path) 
         run_git(["init", "-q"], workspace)
         answer_path = Path(temp) / "judgment.json"
         args = ["exec", "--sandbox", "read-only", "--cd", str(workspace), "--ephemeral", "--ignore-user-config",
-                "--output-schema", str(workspace / schema.name), "--output-last-message", str(answer_path), "--json", "-"]
+                "--output-schema", str(workspace / schema.name), "--output-last-message", str(answer_path), "--json",]
         command, wrapper = command_for_cli(executable, args)
         prompt = "\n\n".join((JUDGE_PROMPT, "# RUBRIC", read_text(rubric).strip(), "# PACKET", read_text(packet).strip()))
         try:
@@ -1475,7 +1475,7 @@ def cli_args(runner: str, model: str, effort: str, workspace: Path, answer_path:
             args.extend(["--model", model])
         args.extend([
             "--sandbox", "workspace-write", "--cd", str(workspace), "--ephemeral",
-            "--ignore-user-config", "--output-last-message", str(answer_path), "-",
+            "--ignore-user-config", "--output-last-message", str(answer_path),
         ])
         return args, prompt
 
