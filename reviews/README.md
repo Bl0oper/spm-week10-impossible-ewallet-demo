@@ -6,4 +6,4 @@ The judge is advisory. It does not change CI behaviour labels or replace a perso
 
 | Review | Completed | Judge | Candidates |
 |---|---|---|---|
-| (no published reviews yet) | - | - | 0 |
+| [review-20261020-192938-526c](review-20261020-192938-526c/) | 2026-10-20T19:46:46+08:00 | codex (openai) | 18 |
