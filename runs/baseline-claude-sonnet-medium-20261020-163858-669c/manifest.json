@@ -1,0 +1,27 @@
+{
+  "run_id": "baseline-claude-sonnet-medium-20261020-163858-669c",
+  "runner": "claude",
+  "model": "sonnet",
+  "effort": "medium",
+  "prompt_kind": "baseline",
+  "started": "2026-10-20T16:38:58+08:00",
+  "status": "completed",
+  "task_commit": "daadf776caa3d15c510ee08c173cca9698f92705",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "PASS",
+      "exit_code": 0
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "duration_seconds": 26,
+  "model_used": "claude-sonnet-5"
+}
