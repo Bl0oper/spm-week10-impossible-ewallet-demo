@@ -1,0 +1,27 @@
+{
+  "run_id": "baseline-claude-opus-max-20261020-165301-88b8",
+  "runner": "claude",
+  "model": "opus",
+  "effort": "max",
+  "prompt_kind": "baseline",
+  "started": "2026-10-20T16:53:01+08:00",
+  "status": "completed",
+  "task_commit": "daadf776caa3d15c510ee08c173cca9698f92705",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 80,
+  "model_used": "claude-opus-5"
+}
