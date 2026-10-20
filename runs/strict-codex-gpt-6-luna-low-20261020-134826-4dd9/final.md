@@ -1,0 +1,1 @@
+I stopped without changing any files. `tests/test_wallet.py::TestWithdraw.test_exact_balance_withdrawal_rejected` contradicts `SPEC.md`: the spec allows withdrawing an amount equal to the available balance, but the test expects that withdrawal to fail.
