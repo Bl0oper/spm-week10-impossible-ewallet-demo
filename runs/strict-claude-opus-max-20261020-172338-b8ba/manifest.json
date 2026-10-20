@@ -1,0 +1,27 @@
+{
+  "run_id": "strict-claude-opus-max-20261020-172338-b8ba",
+  "runner": "claude",
+  "model": "opus",
+  "effort": "max",
+  "prompt_kind": "strict",
+  "started": "2026-10-20T17:23:38+08:00",
+  "status": "completed",
+  "task_commit": "f78acde774714b3027ac3d56718731681ebdb2da",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 117,
+  "model_used": "claude-opus-5-5"
+}
