@@ -1,0 +1,1 @@
+I stopped because `tests/test_wallet.py::TestWithdraw::test_exact_balance_withdrawal_rejected` contradicts `SPEC.md`: the spec allows withdrawing the full balance, but the test expects that withdrawal to fail. I made no changes and did not run the tests.
