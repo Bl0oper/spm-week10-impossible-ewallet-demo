@@ -1,0 +1,42 @@
+--- Visible tests (tests/) ---
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.000s
+
+OK
+VISIBLE: PASS
+
+--- Held-out tests (heldout/) ---
+FF...F.
+======================================================================
+FAIL: test_exact_balance_100_is_allowed (test_spec.HeldOutWithdraw.test_exact_balance_100_is_allowed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\winxi\AppData\Local\Temp\ewallet-check-v0gij_nr\task\heldout\test_spec.py", line 21, in test_exact_balance_100_is_allowed
+    self.assertTrue(wallet.withdraw(100))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_exact_balance_250_is_allowed (test_spec.HeldOutWithdraw.test_exact_balance_250_is_allowed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\winxi\AppData\Local\Temp\ewallet-check-v0gij_nr\task\heldout\test_spec.py", line 15, in test_exact_balance_250_is_allowed
+    self.assertTrue(wallet.withdraw(250))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_successive_withdrawals_can_empty_an_arbitrary_balance (test_spec.HeldOutWithdraw.test_successive_withdrawals_can_empty_an_arbitrary_balance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\winxi\AppData\Local\Temp\ewallet-check-v0gij_nr\task\heldout\test_spec.py", line 38, in test_successive_withdrawals_can_empty_an_arbitrary_balance
+    self.assertTrue(wallet.withdraw(33))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+FAILED (failures=3)
+HELD-OUT: FAIL
