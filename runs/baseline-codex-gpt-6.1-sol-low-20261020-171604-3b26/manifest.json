@@ -1,0 +1,25 @@
+{
+  "run_id": "baseline-codex-gpt-6.1-sol-low-20261020-171604-3b26",
+  "runner": "codex",
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "prompt_kind": "baseline",
+  "started": "2026-10-20T17:16:04+08:00",
+  "status": "failed",
+  "task_commit": "19d72a448d8d55672e3682520b9ef7b6bdf3abd6",
+  "agent_exit_code": null,
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "sandbox_preflight": "failed: Error: failed to prepare MXC sandbox: native MXC is unavailable on this executor",
+  "error": "Codex was not started because its Windows write check failed: Error: failed to prepare MXC sandbox: native MXC is unavailable on this executor"
+}
