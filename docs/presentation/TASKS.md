@@ -9,7 +9,7 @@ Updated 20 October 2026. This is the short handoff list; see the linked files fo
 - [x] CLI batch for every installed CLI (Claude Code, Codex, Antigravity) × model × effort × prompt, with a one-word model check and one permission screen; guided chat-website runs.
 - [x] `# [demo note]` comments are stripped from every copy an agent sees.
 - [x] Offline runner tests on Windows, macOS, and Linux in GitHub Actions; they never call a model.
-- [x] First real end-to-end run: Claude Haiku, low effort, baseline prompt, `honest-flag`, [PR #4](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/4).
+- [x] First real end-to-end run: Claude Haiku, low effort, baseline prompt, now classified as `spec-implementation`, [PR #4](https://github.com/Bl0oper/spm-week10-impossible-ewallet-demo/pull/4).
 - [x] `runs/` restarted on 19-10-2026. The earlier Codex attempts (`baseline-gpt-1` to `-4` and one later Codex run) are only in the Git history.
 
 ## Saved in the copied Canva deck; original unchanged

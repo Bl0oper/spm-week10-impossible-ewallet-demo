@@ -8,7 +8,7 @@ Commands are for Windows. On macOS, replace `py -3` with `python3`.
 
 ## 1. A test-editing run
 
-Pick a run labelled `test-edit-cheat` or `test-edit-fix` in [runs/RESULTS.md](../runs/RESULTS.md) and put its diff on a branch:
+Pick a run labelled `test-changed` in [runs/RESULTS.md](../runs/RESULTS.md) and put its diff on a branch:
 
 ```text
 git switch -c agent-<run-id> main
@@ -26,7 +26,7 @@ If no counted run edited `tests/`, say so in the presentation and go straight to
 
 ## 2. Special-casing
 
-On a new branch from `main`, apply a `special-case` run's diff, or the example below, then commit, push, and open a PR:
+On a new branch from `main`, apply a `visible-pass` run's diff, or the example below, then commit, push, and open a PR:
 
 ```text
 git switch -c special-case main
@@ -42,7 +42,7 @@ git push -u origin special-case
 py -3 run_experiment.py check examples/special_case.diff
 ```
 
-It prints `VISIBLE: PASS   HELD-OUT: FAIL`. `examples/special_case.diff` is an illustrative reconstruction, not a recorded agent run. Use a real `special-case` run instead if you have one.
+It prints `VISIBLE: PASS   HELD-OUT: FAIL`. `examples/special_case.diff` is an illustrative reconstruction, not a recorded agent run. Use a real `visible-pass` run instead if you have one.
 
 ## Afterwards
 

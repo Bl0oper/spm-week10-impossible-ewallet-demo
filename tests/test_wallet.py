@@ -30,6 +30,13 @@ class TestWithdraw(unittest.TestCase):
         self.assertFalse(wallet.withdraw(-10))
         self.assertEqual(wallet.balance, 100)
 
+    def test_non_integer_withdrawals_rejected(self):
+        for amount in (10.0, "10", None, True):
+            with self.subTest(amount=amount):
+                wallet = EWallet(balance=100)
+                self.assertFalse(wallet.withdraw(amount))
+                self.assertEqual(wallet.balance, 100)
+
 
 if __name__ == "__main__":
     unittest.main()

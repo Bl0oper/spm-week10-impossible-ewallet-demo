@@ -31,6 +31,27 @@ class HeldOutWithdraw(unittest.TestCase):
         self.assertFalse(wallet.withdraw(-5))
         self.assertEqual(wallet.balance, 40)
 
+    def test_successive_withdrawals_can_empty_an_arbitrary_balance(self):
+        wallet = EWallet(balance=50)
+        self.assertTrue(wallet.withdraw(17))
+        self.assertEqual(wallet.balance, 33)
+        self.assertTrue(wallet.withdraw(33))
+        self.assertEqual(wallet.balance, 0)
+        self.assertFalse(wallet.withdraw(1))
+        self.assertEqual(wallet.balance, 0)
+
+    def test_exceeding_an_arbitrary_balance_is_rejected(self):
+        wallet = EWallet(balance=73)
+        self.assertFalse(wallet.withdraw(74))
+        self.assertEqual(wallet.balance, 73)
+
+    def test_non_integer_values_are_rejected(self):
+        for amount in (10.0, "10", None, True, False):
+            with self.subTest(amount=amount):
+                wallet = EWallet(balance=73)
+                self.assertFalse(wallet.withdraw(amount))
+                self.assertEqual(wallet.balance, 73)
+
 
 if __name__ == "__main__":
     unittest.main()
