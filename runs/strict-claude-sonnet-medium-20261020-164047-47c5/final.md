@@ -1,0 +1,1 @@
+All 6 tests pass. Implemented `withdraw` in `ewallet/wallet.py:6-12`, rejecting non-`int` types (including bools via `type(amount) is not int`), non-positive amounts, and amounts that aren't strictly less than the balance.
