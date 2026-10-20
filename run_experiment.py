@@ -850,17 +850,13 @@ def judge_review(review_id: str, judge_runner: str = "codex", only: Sequence[str
     return review_dir
 
 
-def publish_review(review_id: str) -> Path:
-    """Write a compact public audit report only after every blinded verdict is complete."""
-    review_dir = review_dir_for(review_id)
+def write_public_review(review_dir: Path, destination: Path) -> Path:
+    """Write the safe, human-readable part of a completed review to a chosen folder."""
     review = read_json(review_dir / "review-manifest.json")
     candidates = review.get("candidates") or []
     if not candidates or any(item.get("status") != "judged" for item in candidates):
         raise RunError("Judge every candidate before publishing this review.")
-    destination = ROOT / "reviews" / review_id
-    if destination.exists():
-        raise RunError(f"{destination} already exists.")
-    destination.mkdir(parents=True)
+    destination.mkdir(parents=True, exist_ok=True)
     judgments: list[dict[str, Any]] = []
     for candidate in candidates:
         verdict = validate_judgment(read_json(review_dir / f"Candidate-{candidate['candidate']}" / "verdict.json"))
@@ -879,14 +875,105 @@ def publish_review(review_id: str) -> Path:
     write_json(destination / "judgments.json", public)
     lines = ["# Blinded cross-family review", "",
              f"Judge: `{review['judge_runner']}` family `{review['judge_family']}` (model: `{review['judge_model']}`; CLI: `{review.get('judge_cli_version', 'not recorded')}`).", "",
-             "The judge saw redacted, blinded packets. It did not set any CI behavioural label. Review its verdicts against the source evidence.", "",
-             "| Candidate | Source run (revealed after review) | Exact conflict | Report matches artifacts |", "|---|---|---|---|"]
+             "The judge saw redacted, blinded packets. It did not set any CI behavioural label. The source run is revealed below only after judging is complete.", "",
+             "## Results", "",
+             "| Candidate | Source run | Exact conflict | Report matches artifacts |", "|---|---|---|---|"]
     for item in judgments:
         verdict = item["verdict"]
-        lines.append(f"| {item['candidate']} | `{item['source_run']}` | {verdict['identified_exact_conflict']} | {verdict['report_matches_artifacts']} |")
-    lines += ["", "See `judgments.json` for evidence references and stated limitations.", ""]
+        lines.append(f"| {item['candidate']} | [{item['source_run']}](../../runs/{item['source_run']}/) | "
+                     f"{verdict['identified_exact_conflict']} | {verdict['report_matches_artifacts']} |")
+    for item in judgments:
+        verdict = item["verdict"]
+        lines += ["", f"## Candidate {item['candidate']}", "",
+                  f"Source run: [{item['source_run']}](../../runs/{item['source_run']}/)", "",
+                  f"- **Identified the exact conflict:** {verdict['identified_exact_conflict']}",
+                  f"- **Report matches artifacts:** {verdict['report_matches_artifacts']}",
+                  "- **Evidence cited by the judge:**"]
+        lines += [f"  - {evidence}" for evidence in verdict["evidence"]]
+        lines += [f"- **Judge limitation:** {verdict['limitations']}"]
+    lines += ["", "## Limitations", "", public["limitations"],
+              "", "The public report excludes raw transcripts, blinded packets, private candidate mappings, and raw judge events.", ""]
     (destination / "README.md").write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return destination
+
+
+def review_index_text(reviews_dir: Path) -> str:
+    """Render a web-friendly index of the public reports, without loading private review evidence."""
+    rows: list[tuple[str, dict[str, Any]]] = []
+    for folder in reviews_dir.glob("review-*"):
+        try:
+            public = read_json(folder / "judgments.json")
+        except RunError:
+            continue
+        if public.get("review_id") == folder.name:
+            rows.append((folder.name, public))
+    rows.sort(key=lambda item: (str(item[1].get("completed") or item[1].get("created") or ""), item[0]), reverse=True)
+    lines = ["# Cross-family judge reports", "",
+             "These reports are safe to read on GitHub. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.",
+             "", "The judge is advisory. It does not change CI behaviour labels or replace a person's review of the source evidence.",
+             "", "| Review | Completed | Judge | Candidates |", "|---|---|---|---|"]
+    for review_id, public in rows:
+        judge = f"{public.get('judge_runner', 'unknown')} ({public.get('judge_family', 'unknown')})"
+        count = len(public.get("judgments") or [])
+        completed = str(public.get("completed") or public.get("created") or "not recorded")
+        lines.append(f"| [{review_id}]({review_id}/) | {completed} | {judge} | {count} |")
+    if not rows:
+        lines.append("| (no published reviews yet) | - | - | 0 |")
+    return "\n".join(lines) + "\n"
+
+
+def generate_review_index(reviews_dir: Path | None = None) -> Path:
+    reviews_dir = reviews_dir or ROOT / "reviews"
+    reviews_dir.mkdir(parents=True, exist_ok=True)
+    output = reviews_dir / "README.md"
+    output.write_text(review_index_text(reviews_dir), encoding="utf-8", newline="\n")
+    return output
+
+
+def public_review_url(review_id: str, root: Path | None = None) -> str:
+    root = root or ROOT
+    base = github_url(root)
+    return f"{base}/tree/main/reviews/{review_id}" if base else f"reviews/{review_id}/"
+
+
+def publish_public_review(public: Path, review_id: str, root: Path | None = None) -> str:
+    """Commit and push only a safe report and its index from a temporary worktree."""
+    root = root or ROOT
+    if public.name != "public" or not (public / "README.md").is_file() or not (public / "judgments.json").is_file():
+        raise RunError("The public review report is incomplete.")
+    for attempt in range(1, 6):
+        fetch_main(root)
+        with tempfile.TemporaryDirectory(prefix="ewallet-review-publish-") as temp:
+            tree = Path(temp) / "tree"
+            run_git(["worktree", "add", "--detach", "--quiet", str(tree), "origin/main"], root)
+            try:
+                target = tree / "reviews" / review_id
+                if target.exists():
+                    if (target / "README.md").read_text(encoding="utf-8") == (public / "README.md").read_text(encoding="utf-8") \
+                            and (target / "judgments.json").read_text(encoding="utf-8") == (public / "judgments.json").read_text(encoding="utf-8"):
+                        return public_review_url(review_id, root)
+                    raise RunError(f"A different public review called {review_id} is already on main.")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(public, target)
+                generate_review_index(tree / "reviews")
+                run_git(["add", "--", f"reviews/{review_id}", "reviews/README.md"], tree)
+                identity = [] if has_git_identity(root) else [
+                    "-c", "user.name=EWallet runner", "-c", "user.email=ewallet-runner@users.noreply.github.com"]
+                run_git([*identity, "commit", "--quiet", "-m", f"Publish blinded review {review_id}"], tree)
+                pushed = run_git(["push", "--quiet", "origin", "HEAD:main"], tree, check=False)
+                if pushed.returncode == 0:
+                    return public_review_url(review_id, root)
+            finally:
+                run_git(["worktree", "remove", "--force", str(tree)], root, check=False)
+        time.sleep(attempt)
+    raise RunError("Could not publish the public review to main after 5 attempts. Its safe local copy was kept for retrying.")
+
+
+def publish_review(review_id: str) -> Path:
+    """Write a compact public audit report only after every blinded verdict is complete."""
+    review_dir = review_dir_for(review_id)
+    destination = review_dir / "public"
+    return write_public_review(review_dir, destination)
 
 
 def reviewable_runs(judge_runner: str = "codex") -> list[dict[str, Any]]:
@@ -901,8 +988,8 @@ def reviewable_runs(judge_runner: str = "codex") -> list[dict[str, Any]]:
     return available
 
 
-def unfinished_review(run_ids: Sequence[str], judge_runner: str = "codex") -> Path | None:
-    """Find the newest incomplete local review for exactly this selection, if one exists."""
+def saved_review(run_ids: Sequence[str], judge_runner: str = "codex") -> Path | None:
+    """Find the newest local review for exactly this selection, so finished work can be published again."""
     root = review_root()
     if not root.is_dir():
         return None
@@ -915,14 +1002,13 @@ def unfinished_review(run_ids: Sequence[str], judge_runner: str = "codex") -> Pa
         sources = [str(candidate.get("source_run") or "") for candidate in candidates]
         if review.get("judge_runner") != judge_runner or sources != list(run_ids):
             continue
-        if any(candidate.get("status") != "judged" for candidate in candidates):
-            return folder
+        return folder
     return None
 
 
 def review_selected(run_ids: Sequence[str], judge_runner: str = "codex") -> Path:
     """Prepare or resume one selection, judge packets one at a time, then publish its report."""
-    review_dir = unfinished_review(run_ids, judge_runner)
+    review_dir = saved_review(run_ids, judge_runner)
     if review_dir:
         say(f"Resuming saved blinded review: {review_dir.name}")
     else:
@@ -940,12 +1026,14 @@ def review_selected(run_ids: Sequence[str], judge_runner: str = "codex") -> Path
         # if a terminal or provider call ends between candidates.
         judge_review(review_dir.name, judge_runner, (label,))
 
-    destination = ROOT / "reviews" / review_dir.name
+    destination = review_dir / "public"
     if destination.is_dir():
-        say(f"Public review report already exists: {destination}")
-        return destination
-    public = publish_review(review_dir.name)
-    say(f"Public review report: {public}")
+        public = destination
+    else:
+        public = publish_review(review_dir.name)
+    say(f"Publishing the readable report to main: {public_review_url(review_dir.name)}")
+    website = publish_public_review(public, review_dir.name)
+    say(f"Published review: {website}")
     return public
 
 

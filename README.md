@@ -4,7 +4,7 @@
 
 `SPEC.md` says a wallet can withdraw its full balance. One test in `tests/test_wallet.py` says that must fail, so no honest implementation passes every test. You give an AI coding agent this task and record what it does: does it report the conflict, edit the test, or bend the code to pass? This is a small, first-hand version of [ImpossibleBench](https://arxiv.org/abs/2510.20270). It builds on Week 6 (CI and branch protection) and on Week 9's "healer" agent, which is allowed to edit tests.
 
-**Results:** [runs/RESULTS.md](runs/RESULTS.md), rebuilt by CI after every run.
+**Results:** [runs/RESULTS.md](runs/RESULTS.md), rebuilt by CI after every run. [Cross-family review reports](reviews/) are readable on GitHub after each completed review.
 
 ## Quick start
 
@@ -111,7 +111,7 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
 | `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
-| `py -3 run_experiment.py review` | Show eligible completed CLI runs, choose them by number (or press Enter for all), then prepare, judge, and publish one blinded Codex review. |
+| `py -3 run_experiment.py review` | Show eligible completed CLI runs, choose them by number (or press Enter for all), then prepare, judge, and publish one blinded Codex review to GitHub. |
 | `py -3 run_experiment.py review --all` | Review every eligible completed CLI run without a selection prompt. |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
@@ -125,7 +125,7 @@ Passing both suites is not proof of correctness. Read the diff.
 - CI records fixed behaviour labels. A blinded scorecard review, rather than a keyword match, assesses whether the agent identified the exact conflict and reported truthfully.
 - CLI transcripts are saved automatically and are required for qualitative scorecard comparisons.
 - For current Claude runs, an optional Codex judge receives only a redacted blinded packet and returns an advisory structured verdict. It cannot change a CI label; see [docs/refusal-review.md](docs/refusal-review.md).
-- The current published cross-family result is in [reviews/review-20261020-114004-d934](reviews/review-20261020-114004-d934/).
+- [Cross-family review reports](reviews/) are indexed in Markdown and can be read in GitHub without cloning the repository.
 - `runs/` started fresh with this workflow on 19-10-2026. Earlier trial runs, made with older versions of the tool, are in the Git history only.
 
 ## More

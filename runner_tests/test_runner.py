@@ -412,6 +412,28 @@ class GitFlowTests(unittest.TestCase):
             self.assertEqual(git(clone, "branch", "--list", "run/*"), "")
             self.assertEqual(git(clone, "worktree", "list").count("\n"), 0)
 
+    def test_public_review_is_pushed_with_an_updated_markdown_index(self):
+        with tempfile.TemporaryDirectory() as temp:
+            _, clone = make_github(temp)
+            review_id = "review-20261020-140429-b98a"
+            public = clone / "pending" / "reviews" / review_id / "public"
+            public.mkdir(parents=True)
+            public_data = {
+                "review_id": review_id, "created": "2026-10-20T14:04:29+08:00",
+                "completed": "2026-10-20T14:05:00+08:00", "judge_runner": "codex",
+                "judge_family": "openai", "judgments": [{"candidate": "A"}],
+            }
+            runner.write_json(public / "judgments.json", public_data)
+            (public / "README.md").write_text("# Review\n", encoding="utf-8")
+            url = runner.publish_public_review(public, review_id, clone)
+            git(clone, "fetch", "origin", "main")
+            self.assertEqual(git(clone, "show", f"origin/main:reviews/{review_id}/README.md"), "# Review")
+            index = git(clone, "show", "origin/main:reviews/README.md")
+            self.assertIn(f"[{review_id}]({review_id}/)", index)
+            self.assertIn("codex (openai)", index)
+            self.assertEqual(url, f"reviews/{review_id}/")
+            self.assertEqual(git(clone, "branch", "--show-current"), "main")
+
     def test_local_runs_are_never_submitted(self):
         with tempfile.TemporaryDirectory() as temp:
             run_dir = write_run(Path(temp) / "run", {"status": "completed", "task_commit": "local"})
@@ -556,6 +578,10 @@ class ReviewTests(unittest.TestCase):
             report = json.loads((public / "judgments.json").read_text(encoding="utf-8"))
             self.assertEqual(report["judgments"][0]["source_run"], run_id)
             self.assertEqual(report["judgments"][0]["verdict"], verdict)
+            markdown = (public / "README.md").read_text(encoding="utf-8")
+            self.assertIn("## Candidate A", markdown)
+            self.assertIn("Evidence cited by the judge", markdown)
+            self.assertIn(f"../../runs/{run_id}/", markdown)
 
     def test_review_picker_uses_numbers_instead_of_typed_run_ids(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -593,9 +619,13 @@ class ReviewTests(unittest.TestCase):
             with a, b, c, patch.object(runner, "find_cli", return_value="codex"), \
                     patch.object(runner, "cli_version", return_value="test CLI"), \
                     patch.object(runner, "judge_one_packet", return_value=(verdict, '{"raw":"event"}\n', json.dumps(verdict))), \
-                    patch.object(runner, "judge_review", side_effect=record_judge), redirect_stdout(StringIO()):
+                    patch.object(runner, "judge_review", side_effect=record_judge), \
+                    patch.object(runner, "publish_public_review", return_value="reviews/review-test/") as publish, redirect_stdout(StringIO()):
                 public = runner.review_selected([first, second])
+                resumed = runner.review_selected([first, second])
             self.assertEqual(calls, [("A",), ("B",)])
+            self.assertEqual(resumed, public)
+            self.assertEqual(publish.call_count, 2)
             self.assertTrue((public / "README.md").is_file())
             report = json.loads((public / "judgments.json").read_text(encoding="utf-8"))
             self.assertEqual([item["source_run"] for item in report["judgments"]], [first, second])
