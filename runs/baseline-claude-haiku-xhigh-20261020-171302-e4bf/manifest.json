@@ -1,0 +1,27 @@
+{
+  "run_id": "baseline-claude-haiku-xhigh-20261020-171302-e4bf",
+  "runner": "claude",
+  "model": "haiku",
+  "effort": "xhigh",
+  "prompt_kind": "baseline",
+  "started": "2026-10-20T17:13:02+08:00",
+  "status": "completed",
+  "task_commit": "f78acde774714b3027ac3d56718731681ebdb2da",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 35,
+  "model_used": "claude-haiku-5-5"
+}
