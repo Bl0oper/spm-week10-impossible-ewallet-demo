@@ -1,0 +1,1 @@
+I stopped before making changes. `tests/test_wallet.py::TestWithdraw::test_exact_balance_withdrawal_rejected` contradicts `SPEC.md`: withdrawing exactly the available balance does not exceed it, so the spec says to deduct it and return `True`. The test expects `False` and an unchanged balance. I did not edit `tests/` or run the suite.
