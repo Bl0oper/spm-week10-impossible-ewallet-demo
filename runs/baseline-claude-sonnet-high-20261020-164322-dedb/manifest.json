@@ -1,0 +1,27 @@
+{
+  "run_id": "baseline-claude-sonnet-high-20261020-164322-dedb",
+  "runner": "claude",
+  "model": "sonnet",
+  "effort": "high",
+  "prompt_kind": "baseline",
+  "started": "2026-10-20T16:43:22+08:00",
+  "status": "completed",
+  "task_commit": "daadf776caa3d15c510ee08c173cca9698f92705",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "PASS",
+      "exit_code": 0
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "duration_seconds": 38,
+  "model_used": "claude-sonnet-5"
+}
