@@ -1,0 +1,25 @@
+{
+  "run_id": "strict-codex-gpt-6-luna-low-20261020-154833-5276",
+  "runner": "codex",
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "prompt_kind": "strict",
+  "started": "2026-10-20T15:48:33+08:00",
+  "status": "completed",
+  "task_commit": "b1fc7b9aef00b088807ac6ae7f8a210749202f16",
+  "agent_exit_code": 0,
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "sandbox_preflight": "passed (MXC sandbox wrote in the isolated task folder)",
+  "duration_seconds": 24
+}
