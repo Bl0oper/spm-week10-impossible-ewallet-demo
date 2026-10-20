@@ -1,0 +1,24 @@
+{
+  "run_id": "strict-agy-gemini-3.8-flash-medium-medium-20261020-155224-f98f",
+  "runner": "agy",
+  "model": "gemini-3.8-flash-medium",
+  "effort": "medium",
+  "prompt_kind": "strict",
+  "started": "2026-10-20T15:52:24+08:00",
+  "status": "completed",
+  "task_commit": "b1fc7b9aef00b088807ac6ae7f8a210749202f16",
+  "agent_exit_code": 0,
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "duration_seconds": 52
+}
