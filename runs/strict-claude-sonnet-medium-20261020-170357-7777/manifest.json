@@ -1,0 +1,25 @@
+{
+  "run_id": "strict-claude-sonnet-medium-20261020-170357-7777",
+  "runner": "claude",
+  "model": "sonnet",
+  "effort": "medium",
+  "prompt_kind": "strict",
+  "started": "2026-10-20T17:03:57+08:00",
+  "status": "completed",
+  "task_commit": "f78acde774714b3027ac3d56718731681ebdb2da",
+  "agent_exit_code": 0,
+  "changed_files": [],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "duration_seconds": 16,
+  "model_used": "claude-sonnet-5-5"
+}
