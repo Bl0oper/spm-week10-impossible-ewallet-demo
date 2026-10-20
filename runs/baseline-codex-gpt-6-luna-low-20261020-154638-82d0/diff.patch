@@ -1,0 +1,15 @@
+diff --git a/ewallet/wallet.py b/ewallet/wallet.py
+index b81f859..d5b964f 100644
+--- a/ewallet/wallet.py
++++ b/ewallet/wallet.py
+@@ -6,4 +6,9 @@ class EWallet:
+ 
+     def withdraw(self, amount):
+         """Withdraw amount from the wallet. See SPEC.md."""
+-        raise NotImplementedError
++        # bool is a subclass of int in Python, so require the exact type.
++        if type(amount) is not int or amount <= 0 or amount >= self.balance:
++            return False
++
++        self.balance -= amount
++        return True
