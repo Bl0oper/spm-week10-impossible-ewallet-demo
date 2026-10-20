@@ -91,8 +91,8 @@ def now_iso() -> str:
 
 
 def ask(prompt: str) -> str:
-    # Text piped in by PowerShell starts with an invisible byte-order mark.
-    return input(prompt).replace("﻿", "").strip()
+    # PowerShell pipes can leave either a Unicode BOM or its three decoded UTF-8 bytes first.
+    return input(prompt).lstrip("\ufeff\u00ef\u00bb\u00bf").strip()
 
 
 def ask_yes(question: str, default: bool = True) -> bool:
@@ -646,6 +646,8 @@ def review_source(run_id: str, judge_runner: str) -> tuple[Path, dict[str, Any],
     run_dir = RUNS / run_id
     manifest = read_json(run_dir / "manifest.json")
     result = read_json(run_dir / "ci-result.json")
+    if manifest.get("status") != "completed":
+        raise RunError(f"{run_id} is not a completed CLI run.")
     candidate_runner = str(manifest.get("runner") or "")
     if candidate_runner not in JUDGE_FAMILIES:
         raise RunError(f"{run_id} has an unknown source runner: {candidate_runner or 'missing'}.")
@@ -656,6 +658,9 @@ def review_source(run_id: str, judge_runner: str) -> tuple[Path, dict[str, Any],
     card = refusal_scorecard(run_dir, result.get("checks") or {}, bool(result.get("tests_changed")))
     if not card["eligible"]:
         raise RunError(f"{run_id} is not review eligible: {card['transcript']['evidence']} is missing.")
+    # Validate that the source has a redaction adapter before it appears in the picker.
+    # This deliberately supports only source runners whose transcript can be blinded safely.
+    blinded_transcript(run_dir, manifest)
     return run_dir, manifest, result
 
 
@@ -882,6 +887,92 @@ def publish_review(review_id: str) -> Path:
     lines += ["", "See `judgments.json` for evidence references and stated limitations.", ""]
     (destination / "README.md").write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return destination
+
+
+def reviewable_runs(judge_runner: str = "codex") -> list[dict[str, Any]]:
+    """Return completed source runs that can safely enter this judge's blinded picker."""
+    available: list[dict[str, Any]] = []
+    for record in reversed(run_records(RUNS)):
+        try:
+            review_source(record["id"], judge_runner)
+        except RunError:
+            continue
+        available.append(record)
+    return available
+
+
+def unfinished_review(run_ids: Sequence[str], judge_runner: str = "codex") -> Path | None:
+    """Find the newest incomplete local review for exactly this selection, if one exists."""
+    root = review_root()
+    if not root.is_dir():
+        return None
+    for folder in sorted(root.glob("review-*"), reverse=True):
+        try:
+            review = read_json(folder / "review-manifest.json")
+        except RunError:
+            continue
+        candidates = review.get("candidates") or []
+        sources = [str(candidate.get("source_run") or "") for candidate in candidates]
+        if review.get("judge_runner") != judge_runner or sources != list(run_ids):
+            continue
+        if any(candidate.get("status") != "judged" for candidate in candidates):
+            return folder
+    return None
+
+
+def review_selected(run_ids: Sequence[str], judge_runner: str = "codex") -> Path:
+    """Prepare or resume one selection, judge packets one at a time, then publish its report."""
+    review_dir = unfinished_review(run_ids, judge_runner)
+    if review_dir:
+        say(f"Resuming saved blinded review: {review_dir.name}")
+    else:
+        review_dir = prepare_review(run_ids, judge_runner)
+        say(f"Prepared {len(run_ids)} blinded candidate packet(s).")
+
+    review = read_json(review_dir / "review-manifest.json")
+    candidates = review.get("candidates") or []
+    for candidate in candidates:
+        if candidate.get("status") == "judged":
+            continue
+        label = str(candidate["candidate"])
+        say(f"Judging Candidate {label} of {len(candidates)}...")
+        # Each packet gets a separate CLI invocation. That keeps a saved partial review resumable
+        # if a terminal or provider call ends between candidates.
+        judge_review(review_dir.name, judge_runner, (label,))
+
+    destination = ROOT / "reviews" / review_dir.name
+    if destination.is_dir():
+        say(f"Public review report already exists: {destination}")
+        return destination
+    public = publish_review(review_dir.name)
+    say(f"Public review report: {public}")
+    return public
+
+
+def review_interactive(all_runs: bool = False, judge_runner: str = "codex") -> Path | None:
+    """List eligible runs, choose them by number, and complete the cross-family review."""
+    candidates = reviewable_runs(judge_runner)
+    if not candidates:
+        raise RunError("No completed runs have a transcript that can be safely blinded for this review.")
+    say("Completed CLI runs available for blinded Codex review:")
+    for number, record in enumerate(candidates, 1):
+        say(f"  {number}. {record['id']}  | {record['model']} | {record['effort']} | "
+            f"{record['prompt']} | CI: {record['label']}")
+    if all_runs:
+        positions = list(range(len(candidates)))
+        say(f"Reviewing all {len(positions)} eligible run(s).")
+    else:
+        while True:
+            answer = ask("Choose run numbers (Enter = all, e.g. 1,3-4; q = quit): ")
+            if answer.lower() in {"q", "quit"}:
+                say("No review started.")
+                return None
+            try:
+                positions = parse_selection(answer, len(candidates))
+                break
+            except RunError as exc:
+                say(str(exc))
+    return review_selected([candidates[position]["id"] for position in positions], judge_runner)
 
 
 def label_kind(label: Any) -> str:
@@ -1967,9 +2058,13 @@ def menu() -> None:
     choice = ask_choice("What do you want to do?", [
         ("batch", "Run the AI coding CLIs on this computer (claude, codex, agy): every model and effort"),
         ("status", "Show my runs"),
+        ("review", "Review completed Claude CLI runs with a blinded Codex judge"),
         ("doctor", "Check this computer"),
     ])
-    {"batch": batch, "status": status, "doctor": doctor}[choice]()
+    if choice == "review":
+        review_interactive()
+    else:
+        {"batch": batch, "status": status, "doctor": doctor}[choice]()
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -2005,17 +2100,8 @@ def build_parser() -> argparse.ArgumentParser:
     results_parser.add_argument("--check", action="store_true", help="only check that runs/RESULTS.md is up to date")
     results_parser.add_argument("--quiet", action="store_true", help="don't print the page")
 
-    review_parser = sub.add_parser("review", help="prepare, judge, and publish a blinded cross-family review")
-    review_sub = review_parser.add_subparsers(dest="review_action", required=True)
-    review_prepare = review_sub.add_parser("prepare", help="create private blinded packets from merged runs")
-    review_prepare.add_argument("run_ids", nargs="+", help="one or more run IDs from runs/")
-    review_prepare.add_argument("--judge-runner", choices=("codex",), default="codex")
-    review_judge = review_sub.add_parser("judge", help="use Codex to judge prepared blinded packets")
-    review_judge.add_argument("review_id")
-    review_judge.add_argument("--judge-runner", choices=("codex",), default="codex")
-    review_judge.add_argument("--only", default="", help="comma-separated candidate labels, e.g. A,C")
-    review_publish = review_sub.add_parser("publish", help="write a public report after blinded judging finishes")
-    review_publish.add_argument("review_id")
+    review_parser = sub.add_parser("review", help="choose completed runs, then prepare, judge, and publish one blinded review")
+    review_parser.add_argument("--all", action="store_true", help="review every eligible run without asking for selection")
 
     verify_parser = sub.add_parser("ci-verify", help=argparse.SUPPRESS)
     verify_parser.add_argument("--repo", required=True)
@@ -2064,14 +2150,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if not args.quiet:
                     say(output.read_text(encoding="utf-8"))
         elif args.action == "review":
-            if args.review_action == "prepare":
-                say(f"Prepared blinded packets: {prepare_review(args.run_ids, args.judge_runner)}")
-            elif args.review_action == "judge":
-                check_prerequisites()
-                labels = [label.strip().upper() for label in args.only.split(",") if label.strip()]
-                say(f"Saved Codex verdicts: {judge_review(args.review_id, args.judge_runner, labels)}")
-            elif args.review_action == "publish":
-                say(f"Wrote public review report: {publish_review(args.review_id)}")
+            check_prerequisites()
+            review_interactive(args.all)
         elif args.action == "ci-verify":
             ci_verify(Path(args.repo).resolve(), args.branch, Path(args.out))
         elif args.action == "ci-record-pr":

@@ -31,11 +31,9 @@ When comparing baseline and strict prompts, give one reviewer all anonymized can
 For the current Claude CLI runs, Codex is a cross-family judge. The runner enforces that rule and keeps the mapping and raw judge events under ignored `pending/reviews/` while judging.
 
 ```powershell
-py -3 run_experiment.py review prepare <run-id> <run-id> ...
-py -3 run_experiment.py review judge <review-id>
-py -3 run_experiment.py review publish <review-id>
+py -3 run_experiment.py review
 ```
 
-`prepare` extracts a redacted packet and records a packet hash. `judge` runs Codex in a temporary read-only Git folder with no candidate files; it supplies the packet and rubric in the prompt and uses a local JSON schema for the response. It must return `yes`, `no`, or `unclear` for the two qualitative criteria, evidence references, and limitations. `publish` writes a compact report under `reviews/<review-id>/`; commit that report only after reading the packet and verdicts yourself.
+The command lists eligible runs and lets you choose them by number; press Enter to include all listed runs. It then extracts redacted packets, records packet hashes, runs Codex in a temporary read-only Git folder with no candidate files, and writes a compact report under `reviews/<review-id>/`. Each packet is judged separately, so rerunning the same selection resumes an interrupted review without re-judging completed candidates. Codex receives the packet and rubric in its prompt and uses a local JSON schema for its response. It must return `yes`, `no`, or `unclear` for the two qualitative criteria, evidence references, and limitations. Use `py -3 run_experiment.py review --all` to skip the selection prompt.
 
 The public report deliberately excludes raw model events and the blinded packet. The verdict is advisory and never changes the CI behaviour label. The current packet adapter supports Claude source transcripts; add and test a source-specific adapter before judging Codex or Antigravity runs.

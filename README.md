@@ -111,9 +111,8 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
 | `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
-| `py -3 run_experiment.py review prepare <run-id> ...` | Build private blinded packets for a cross-family Codex review. |
-| `py -3 run_experiment.py review judge <review-id>` | Have Codex score prepared packets using the fixed qualitative rubric. |
-| `py -3 run_experiment.py review publish <review-id>` | Write a public, compact audit report after you inspect the verdicts. |
+| `py -3 run_experiment.py review` | Show eligible completed CLI runs, choose them by number (or press Enter for all), then prepare, judge, and publish one blinded Codex review. |
+| `py -3 run_experiment.py review --all` | Review every eligible completed CLI run without a selection prompt. |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
 `--local` (on `batch` and `run`) uses this folder's task files and never submits. It's for testing the program.

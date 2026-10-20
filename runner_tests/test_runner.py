@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
@@ -118,6 +118,10 @@ class RunIdTests(unittest.TestCase):
 
 
 class CliArgsTests(unittest.TestCase):
+    def test_prompt_input_strips_powerShell_pipe_markers(self):
+        with patch("builtins.input", return_value="\u00ef\u00bb\u00bfq"):
+            self.assertEqual(runner.ask("Choose: "), "q")
+
     def test_model_and_effort_reach_each_cli(self):
         codex, codex_stdin = runner.cli_args("codex", "gpt model", "low", Path("t"), Path("a"), "prompt")
         self.assertEqual(codex[codex.index("--model") + 1], "gpt model")
@@ -477,8 +481,9 @@ class GitFlowTests(unittest.TestCase):
 
 
 class ReviewTests(unittest.TestCase):
-    def make_reviewable_run(self, temp: str, run_id: str, source_runner: str = "claude") -> Path:
-        root = make_task_root(temp, planted=True)
+    def make_reviewable_run(self, temp: str, run_id: str, source_runner: str = "claude",
+                            root: Path | None = None) -> Path:
+        root = root or make_task_root(temp, planted=True)
         run_dir = root / "runs" / run_id
         manifest = {
             "run_id": run_id, "runner": source_runner, "model": "haiku", "model_used": "claude-haiku-5-5",
@@ -551,6 +556,55 @@ class ReviewTests(unittest.TestCase):
             report = json.loads((public / "judgments.json").read_text(encoding="utf-8"))
             self.assertEqual(report["judgments"][0]["source_run"], run_id)
             self.assertEqual(report["judgments"][0]["verdict"], verdict)
+
+    def test_review_picker_uses_numbers_instead_of_typed_run_ids(self):
+        with tempfile.TemporaryDirectory() as temp:
+            first = "baseline-claude-haiku-low-20261020-120000-abcd"
+            second = "strict-claude-haiku-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, first)
+            self.make_reviewable_run(temp, second, root=root)
+            a, b, c = pointed_at(root)
+            with a, b, c, patch("builtins.input", return_value="1"), \
+                    patch.object(runner, "review_selected", return_value=root / "reviews" / "review-test") as selected, \
+                    redirect_stdout(StringIO()) as output:
+                report = runner.review_interactive()
+            self.assertEqual(report, root / "reviews" / "review-test")
+            selected.assert_called_once_with([second], "codex")
+            shown = output.getvalue()
+            self.assertIn(f"1. {second}", shown)
+            self.assertIn(f"2. {first}", shown)
+
+    def test_review_selected_judges_each_packet_and_publishes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            first = "baseline-claude-haiku-low-20261020-120000-abcd"
+            second = "strict-claude-haiku-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, first)
+            self.make_reviewable_run(temp, second, root=root)
+            verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                       "evidence": ["Final report", "CI facts"], "limitations": "One toy task."}
+            calls: list[tuple[str, ...]] = []
+            original_judge = runner.judge_review
+
+            def record_judge(review_id, judge_runner="codex", only=()):
+                calls.append(tuple(only))
+                return original_judge(review_id, judge_runner, only)
+
+            a, b, c = pointed_at(root)
+            with a, b, c, patch.object(runner, "find_cli", return_value="codex"), \
+                    patch.object(runner, "cli_version", return_value="test CLI"), \
+                    patch.object(runner, "judge_one_packet", return_value=(verdict, '{"raw":"event"}\n', json.dumps(verdict))), \
+                    patch.object(runner, "judge_review", side_effect=record_judge), redirect_stdout(StringIO()):
+                public = runner.review_selected([first, second])
+            self.assertEqual(calls, [("A",), ("B",)])
+            self.assertTrue((public / "README.md").is_file())
+            report = json.loads((public / "judgments.json").read_text(encoding="utf-8"))
+            self.assertEqual([item["source_run"] for item in report["judgments"]], [first, second])
+
+    def test_review_command_has_a_noninteractive_all_option(self):
+        args = runner.build_parser().parse_args(["review", "--all"])
+        self.assertTrue(args.all)
+        with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+            runner.build_parser().parse_args(["review", "prepare", "some-run"])
 
 
 class BatchTests(unittest.TestCase):
