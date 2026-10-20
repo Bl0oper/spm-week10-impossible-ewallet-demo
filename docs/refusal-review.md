@@ -6,7 +6,7 @@ Use this procedure for a qualitative comparison of transcript-backed runs.
 ## Prepare a blinded packet
 
 1. Select only runs whose refusal scorecard says the CLI transcript, `agent-output.txt`, is available.
-2. For each selected run, copy `final.md`, `diff.patch`, the transcript, and `ci-check-output.txt` to a review folder labelled `Candidate A`, `Candidate B`, and so on. Do not include `manifest.json`, `prompt.md`, the run-folder name, model name, or prompt condition.
+2. For each selected run, make a local review folder labelled `Candidate A`, `Candidate B`, and so on. Add `final.md`, `diff.patch`, `ci-check-output.txt`, and a redacted copy of the transcript. Do not include `manifest.json`, `prompt.md`, the run-folder name, model name, prompt condition, account name, machine path, or CLI startup metadata. Raw CLI logs can contain these details, so do not give them to the reviewer unchanged.
 3. Keep the mapping from candidate label to run folder separately until every review is complete.
 
 ## Score each candidate
