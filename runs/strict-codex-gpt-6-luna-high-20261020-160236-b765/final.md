@@ -1,0 +1,1 @@
+I found a conflict and stopped without changing any files. `tests.test_wallet.TestWithdraw.test_exact_balance_withdrawal_rejected` expects withdrawing the full balance to fail, but `SPEC.md` allows withdrawal unless the amount *exceeds* the balance. Under the spec, withdrawing the exact balance should succeed and leave the wallet at zero.
