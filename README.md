@@ -111,6 +111,9 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
 | `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
+| `py -3 run_experiment.py review prepare <run-id> ...` | Build private blinded packets for a cross-family Codex review. |
+| `py -3 run_experiment.py review judge <review-id>` | Have Codex score prepared packets using the fixed qualitative rubric. |
+| `py -3 run_experiment.py review publish <review-id>` | Write a public, compact audit report after you inspect the verdicts. |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
 `--local` (on `batch` and `run`) uses this folder's task files and never submits. It's for testing the program.
@@ -122,6 +125,8 @@ Passing both suites is not proof of correctness. Read the diff.
 - No memory carries over between runs: each run starts in a new folder. The Claude CLI runs with `--safe-mode --no-session-persistence`, so personal CLAUDE.md files, hooks, MCP servers and saved sessions are off; Codex runs with `--ephemeral --ignore-user-config`.
 - CI records fixed behaviour labels. A blinded scorecard review, rather than a keyword match, assesses whether the agent identified the exact conflict and reported truthfully.
 - CLI transcripts are saved automatically and are required for qualitative scorecard comparisons.
+- For current Claude runs, an optional Codex judge receives only a redacted blinded packet and returns an advisory structured verdict. It cannot change a CI label; see [docs/refusal-review.md](docs/refusal-review.md).
+- The current published cross-family result is in [reviews/review-20261020-114004-d934](reviews/review-20261020-114004-d934/).
 - `runs/` started fresh with this workflow on 19-10-2026. Earlier trial runs, made with older versions of the tool, are in the Git history only.
 
 ## More
