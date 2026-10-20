@@ -539,8 +539,11 @@ def redact_review_text(text: str, sensitive: Sequence[str] = ()) -> str:
     for value in sorted({item for item in sensitive if item}, key=len, reverse=True):
         redacted = re.sub(re.escape(value), "<redacted>", redacted, flags=re.IGNORECASE)
     redacted = re.sub(r"(?i)\b[a-z]:[\\/][^\s'\"`<>|]+", "<path>", redacted)
-    redacted = re.sub(r"/(?:Users|home|tmp|var/folders)/[^\s'\"`<>|]+", "<path>", redacted)
-    redacted = re.sub(r"(?i)\b(?:claude|anthropic|openai|codex|chatgpt|gemini|google)\b", "<provider>", redacted)
+    redacted = re.sub(
+        r"/(?:private/(?:var/folders|tmp|var/tmp)|Users|home|tmp|var/folders|var/tmp|opt)/[^\s'\"`<>|]+",
+        "<path>", redacted,
+    )
+    redacted = re.sub(r"(?i)\b(?:claude|anthropic|openai|codex|chatgpt|gemini|google|agy|antigravity)\b", "<provider>", redacted)
     redacted = re.sub(r"(?i)\b(?:baseline|strict)\b", "<condition>", redacted)
     redacted = re.sub(r"(?m)^([bcdlps-][rwxSTst-]{9}\s+\d+\s+)\S+\s+\S+", r"\1<owner> <group>", redacted)
     return redacted
@@ -1114,6 +1117,7 @@ def run_records(runs_dir: Path) -> list[dict[str, Any]]:
                                       bool(ci.get("tests_changed", manifest.get("tests_changed"))))
         records.append({
             "id": manifest_path.parent.name,
+            "started": str(manifest.get("started") or ""),
             "date": str(manifest.get("started", ""))[:10],
             "runner": str(manifest.get("runner") or "-"),
             "model": str(manifest.get("model_used") or manifest.get("model") or "-"),
@@ -1128,7 +1132,7 @@ def run_records(runs_dir: Path) -> list[dict[str, Any]]:
             "pr_url": ci.get("pr_url", ""),
             "scorecard": scorecard,
         })
-    return sorted(records, key=lambda record: (record["date"], record["id"]))
+    return sorted(records, key=lambda record: (record["started"], record["id"]))
 
 
 def run_links(record: dict[str, Any]) -> str:

@@ -529,6 +529,32 @@ class ReviewTests(unittest.TestCase):
         (run_dir / "agent-output.txt").write_text("\n".join(json.dumps(event) for event in events), encoding="utf-8")
         return root
 
+    def test_review_redaction_covers_common_posix_paths_and_runner_names(self):
+        redacted = runner.redact_review_text(
+            "at /private/var/folders/a/b, /private/tmp/job, /var/tmp/job, and /opt/task using agy Antigravity"
+        )
+        self.assertNotIn("/private", redacted)
+        self.assertNotIn("/var/tmp", redacted)
+        self.assertNotIn("/opt/", redacted)
+        self.assertNotRegex(redacted.lower(), r"\b(?:agy|antigravity)\b")
+
+    def test_review_picker_orders_runs_by_actual_start_time(self):
+        with tempfile.TemporaryDirectory() as temp:
+            earlier = "strict-claude-haiku-low-20261020-120000-abcd"
+            later = "baseline-claude-haiku-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, earlier)
+            self.make_reviewable_run(temp, later, root=root)
+            for run_id, started in ((earlier, "2026-10-20T12:00:00+08:00"),
+                                    (later, "2026-10-20T12:01:00+08:00")):
+                manifest_path = root / "runs" / run_id / "manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest["started"] = started
+                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                candidates = runner.reviewable_runs()
+            self.assertEqual([record["id"] for record in candidates], [later, earlier])
+
     def test_prepare_review_blinds_the_packet_and_records_a_private_mapping(self):
         with tempfile.TemporaryDirectory() as temp:
             run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
