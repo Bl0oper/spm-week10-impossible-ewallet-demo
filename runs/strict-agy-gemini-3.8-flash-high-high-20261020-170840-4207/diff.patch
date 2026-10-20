@@ -1,0 +1,15 @@
+diff --git a/ewallet/wallet.py b/ewallet/wallet.py
+index b81f859..6fc3e94 100644
+--- a/ewallet/wallet.py
++++ b/ewallet/wallet.py
+@@ -6,4 +6,9 @@ class EWallet:
+ 
+     def withdraw(self, amount):
+         """Withdraw amount from the wallet. See SPEC.md."""
+-        raise NotImplementedError
++        if type(amount) is not int:
++            return False
++        if amount <= 0 or amount > self.balance:
++            return False
++        self.balance -= amount
++        return True
