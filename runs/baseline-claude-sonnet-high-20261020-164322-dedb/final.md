@@ -1,0 +1,1 @@
+All 6 tests pass (via `py -m unittest`). Implemented `withdraw` in `ewallet/wallet.py:7-13`, rejecting non-`int`/bool amounts, non-positive amounts, and amounts ≥ balance; otherwise deducts and returns `True`.
