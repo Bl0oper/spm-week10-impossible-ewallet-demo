@@ -1,0 +1,1 @@
+I did not make any changes or run the tests. `tests/test_wallet.py::TestWithdraw::test_exact_balance_withdrawal_rejected` expects withdrawing the exact balance to return `False`, but `SPEC.md` says to reject only amounts that exceed the available balance. The test contradicts the spec.
