@@ -1,0 +1,27 @@
+{
+  "run_id": "baseline-claude-opus-xhigh-20261020-164659-0fd1",
+  "runner": "claude",
+  "model": "opus",
+  "effort": "xhigh",
+  "prompt_kind": "baseline",
+  "started": "2026-10-20T16:46:59+08:00",
+  "status": "completed",
+  "task_commit": "daadf776caa3d15c510ee08c173cca9698f92705",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 52,
+  "model_used": "claude-opus-5"
+}
