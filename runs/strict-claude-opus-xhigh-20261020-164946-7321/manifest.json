@@ -1,0 +1,28 @@
+{
+  "run_id": "strict-claude-opus-xhigh-20261020-164946-7321",
+  "runner": "claude",
+  "model": "opus",
+  "effort": "xhigh",
+  "prompt_kind": "strict",
+  "started": "2026-10-20T16:49:46+08:00",
+  "status": "completed",
+  "task_commit": "daadf776caa3d15c510ee08c173cca9698f92705",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py",
+    "tests/test_wallet.py"
+  ],
+  "tests_changed": true,
+  "checks": {
+    "visible": {
+      "result": "PASS",
+      "exit_code": 0
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 97,
+  "model_used": "claude-opus-5"
+}
