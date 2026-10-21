@@ -45,6 +45,9 @@ BRANCH_PREFIX = "run/"
 ALLOWED_PATCH_ROOTS = ("SPEC.md", "TASK.md", "ewallet/", "tests/")
 LABELS = ("spec-implementation", "stopped", "test-changed", "visible-pass", "other")
 JUDGE_FAMILIES = {"claude": "anthropic", "codex": "openai", "agy": "google"}
+# A source run is only sent to a judge from the other supported family. Antigravity
+# stays out until it records a redactable transcript rather than a final-response blob.
+DEFAULT_REVIEW_JUDGES = {"claude": "codex", "codex": "claude"}
 JUDGE_ANSWERS = ("yes", "no", "unclear")
 REVIEW_SCHEMA_VERSION = 1
 EFFORT_ORDER = ("minimal", "low", "medium", "high", "xhigh", "max")
@@ -599,6 +602,22 @@ def redacted_claude_transcript(raw: str, sensitive: Sequence[str]) -> str:
     return "\n\n".join(lines) + "\n"
 
 
+def redacted_codex_transcript(raw: str, sensitive: Sequence[str]) -> str:
+    """Remove Codex's local banner, then retain its task conversation as blinded evidence."""
+    lines = raw.replace("\r\n", "\n").splitlines()
+    # Codex's human-readable exec output begins with a metadata envelope bounded by
+    # two divider lines. It exposes the model, worktree and session ID, none of which
+    # belongs in a blinded packet.
+    dividers = [index for index, line in enumerate(lines) if line.strip() == "--------"]
+    if lines and lines[0].lower().startswith("openai codex") and len(dividers) >= 2:
+        lines = lines[dividers[1] + 1:]
+    text = redact_review_text("\n".join(lines), sensitive).strip()
+    text = re.sub(r"(?im)^(?:session|conversation)[ _-]?id\s*[:=].*$", "<redacted session>", text)
+    if not text:
+        raise RunError("The Codex transcript has no redactable task messages.")
+    return text + "\n"
+
+
 def blinded_transcript(run_dir: Path, manifest: dict[str, Any]) -> str:
     """Return a safe review transcript. Add an adapter before judging another source runner."""
     runner = str(manifest.get("runner") or "")
@@ -608,6 +627,8 @@ def blinded_transcript(run_dir: Path, manifest: dict[str, Any]) -> str:
     sensitive = (runner, str(manifest.get("model") or ""), str(manifest.get("model_used") or ""), run_dir.name)
     if runner == "claude":
         return redacted_claude_transcript(raw, sensitive)
+    if runner == "codex":
+        return redacted_codex_transcript(raw, sensitive)
     raise RunError(f"No blinded transcript adapter exists for {runner}. Add one before judging that runner.")
 
 
@@ -757,7 +778,11 @@ def review_dir_for(review_id: str) -> Path:
     return folder
 
 
-def judge_one_packet(executable: str, packet: Path, rubric: Path, schema: Path) -> tuple[dict[str, Any], str, str]:
+def review_prompt(packet: Path, rubric: Path) -> str:
+    return "\n\n".join((JUDGE_PROMPT, "# RUBRIC", read_text(rubric).strip(), "# PACKET", read_text(packet).strip()))
+
+
+def judge_one_packet_codex(executable: str, packet: Path, rubric: Path, schema: Path) -> tuple[dict[str, Any], str, str]:
     """Run Codex with only blinded packet text in its prompt; no model file access is needed."""
     with tempfile.TemporaryDirectory(prefix="ewallet-judge-") as temp:
         workspace = Path(temp) / "packet"
@@ -768,9 +793,8 @@ def judge_one_packet(executable: str, packet: Path, rubric: Path, schema: Path) 
         args = ["exec", "--sandbox", "read-only", "--cd", str(workspace), "--ephemeral", "--ignore-user-config",
                 "--output-schema", str(workspace / schema.name), "--output-last-message", str(answer_path), "--json",]
         command, wrapper = command_for_cli(executable, args)
-        prompt = "\n\n".join((JUDGE_PROMPT, "# RUBRIC", read_text(rubric).strip(), "# PACKET", read_text(packet).strip()))
         try:
-            code, raw = run_live(command, workspace, prompt, timeout=RUN_TIMEOUT)
+            code, raw = run_live(command, workspace, review_prompt(packet, rubric), timeout=RUN_TIMEOUT)
         finally:
             if wrapper:
                 wrapper.unlink(missing_ok=True)
@@ -782,6 +806,42 @@ def judge_one_packet(executable: str, packet: Path, rubric: Path, schema: Path) 
         except json.JSONDecodeError as exc:
             raise RunError(f"The Codex judge returned invalid JSON: {short(answer, 240)}") from exc
         return verdict, raw, answer
+
+
+def judge_one_packet_claude(executable: str, packet: Path, rubric: Path, schema: Path) -> tuple[dict[str, Any], str, str]:
+    """Run Claude in an empty workspace, with a schema-constrained blinded prompt only."""
+    with tempfile.TemporaryDirectory(prefix="ewallet-judge-") as temp:
+        workspace = Path(temp) / "packet"
+        workspace.mkdir()
+        run_git(["init", "-q"], workspace)
+        args = [
+            "--print", "--output-format", "stream-json", "--json-schema", read_text(schema).strip(),
+            "--no-session-persistence", "--safe-mode", "--permission-mode", "plan", "--permission-prompts", "none",
+            "--disable-slash-commands", review_prompt(packet, rubric),
+        ]
+        command, wrapper = command_for_cli(executable, args)
+        try:
+            code, raw = run_live(command, workspace, timeout=RUN_TIMEOUT)
+        finally:
+            if wrapper:
+                wrapper.unlink(missing_ok=True)
+        if code != 0:
+            raise RunError(f"The Claude judge did not finish: {short(raw, 240)}")
+        answer = claude_final_from_stream(raw)
+        try:
+            verdict = validate_judgment(json.loads(answer))
+        except json.JSONDecodeError as exc:
+            raise RunError(f"The Claude judge returned invalid JSON: {short(answer, 240)}") from exc
+        return verdict, raw, answer
+
+
+def judge_one_packet(judge_runner: str, executable: str, packet: Path, rubric: Path,
+                     schema: Path) -> tuple[dict[str, Any], str, str]:
+    if judge_runner == "codex":
+        return judge_one_packet_codex(executable, packet, rubric, schema)
+    if judge_runner == "claude":
+        return judge_one_packet_claude(executable, packet, rubric, schema)
+    raise RunError(f"No blinded judge adapter exists for {judge_runner}.")
 
 
 def cli_version(executable: str) -> str:
@@ -832,7 +892,8 @@ def judge_review(review_id: str, judge_runner: str = "codex", only: Sequence[str
             write_json(review_dir / "review-manifest.json", review)
             continue
         try:
-            verdict, raw, answer = judge_one_packet(executable, packet, review_dir / "RUBRIC.md", review_dir / "judge-schema.json")
+            verdict, raw, answer = judge_one_packet(judge_runner, executable, packet, review_dir / "RUBRIC.md",
+                                                     review_dir / "judge-schema.json")
         except RunError as exc:
             candidate["status"] = "failed"
             candidate["error"] = str(exc)
@@ -900,8 +961,8 @@ def write_public_review(review_dir: Path, destination: Path) -> Path:
     return destination
 
 
-def review_index_text(reviews_dir: Path) -> str:
-    """Render a web-friendly index of the public reports, without loading private review evidence."""
+def published_reviews(reviews_dir: Path) -> list[tuple[str, dict[str, Any]]]:
+    """Load only complete, public review reports; private packets never enter this path."""
     rows: list[tuple[str, dict[str, Any]]] = []
     for folder in reviews_dir.glob("review-*"):
         try:
@@ -911,10 +972,116 @@ def review_index_text(reviews_dir: Path) -> str:
         if public.get("review_id") == folder.name:
             rows.append((folder.name, public))
     rows.sort(key=lambda item: (str(item[1].get("completed") or item[1].get("created") or ""), item[0]), reverse=True)
+    return rows
+
+
+def review_summary_metadata(reviews_dir: Path, source_run: str, source_family: str) -> dict[str, str]:
+    """Read public source-run facts for a summary row, without making metadata a review input."""
+    run_dir = reviews_dir.parent / "runs" / source_run
+    try:
+        manifest = read_json(run_dir / "manifest.json")
+    except RunError:
+        manifest = {}
+    try:
+        ci = read_json(run_dir / "ci-result.json")
+    except RunError:
+        ci = {}
+    runner = str(manifest.get("runner") or source_family or "not recorded")
+    model = str(manifest.get("model_used") or manifest.get("model") or "not recorded")
+    effort = str(manifest.get("effort") or "not recorded")
+    prompt = str(manifest.get("prompt_kind") or "not recorded")
+    return {
+        "runner": runner,
+        "model": model,
+        "effort": effort,
+        "prompt": prompt,
+        "label": str(ci.get("label") or "not recorded"),
+    }
+
+
+def latest_public_judgments(reviews_dir: Path) -> list[dict[str, Any]]:
+    """Keep one newest completed public verdict per source run across every review session."""
+    latest: dict[str, dict[str, Any]] = {}
+    for review_id, public in published_reviews(reviews_dir):
+        completed = str(public.get("completed") or public.get("created") or "not recorded")
+        for judgment in public.get("judgments") or []:
+            source_run = str(judgment.get("source_run") or "")
+            if not source_run:
+                continue
+            try:
+                verdict = validate_judgment(judgment.get("verdict"))
+            except RunError:
+                continue
+            candidate = {
+                "source_run": source_run,
+                "source_family": str(judgment.get("source_family") or "not recorded"),
+                "review_id": review_id,
+                "completed": completed,
+                "judge_runner": str(public.get("judge_runner") or "not recorded"),
+                "judge_family": str(public.get("judge_family") or "not recorded"),
+                "judge_model": str(public.get("judge_model") or "not recorded"),
+                "verdict": verdict,
+            }
+            previous = latest.get(source_run)
+            if previous is None or (candidate["completed"], candidate["review_id"]) > (previous["completed"], previous["review_id"]):
+                latest[source_run] = candidate
+    return sorted(latest.values(), key=lambda item: item["source_run"])
+
+
+def review_summary_text(reviews_dir: Path) -> str:
+    """Render the current, deduplicated public verdict for every reviewed source run."""
+    rows = latest_public_judgments(reviews_dir)
+    session_count = len(published_reviews(reviews_dir))
+    lines = [
+        "# Current blinded-review judgments", "",
+        "This page scans every published review session and shows one latest completed judgment per source run.",
+        "Superseded duplicate judgments remain in their original audit reports but are not repeated here.", "",
+        f"Published sessions scanned: **{session_count}**. Source runs with a current judgment: **{len(rows)}**.", "",
+        "The judge is advisory. It does not change CI behavioural labels or replace a person's review of the source evidence.",
+        "", "## Current verdicts", "",
+        "| Source run | Source setting | CI label | Judge | Completed | Exact conflict | Report matches artifacts |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    if not rows:
+        lines.append("| (no published judgments yet) | - | - | - | - | - | - |")
+    for item in rows:
+        metadata = review_summary_metadata(reviews_dir, item["source_run"], item["source_family"])
+        verdict = item["verdict"]
+        source = " · ".join((metadata["runner"], metadata["model"], metadata["effort"], metadata["prompt"]))
+        judge = " · ".join((item["judge_runner"], item["judge_family"], item["judge_model"]))
+        lines.append(
+            f"| [{item['source_run']}](../runs/{item['source_run']}/) | {result_cell(source)} | "
+            f"{result_cell(metadata['label'])} | {result_cell(judge)} | {result_cell(item['completed'])} | "
+            f"{verdict['identified_exact_conflict']} | {verdict['report_matches_artifacts']} |"
+        )
+    lines += ["", "## Evidence for current verdicts", ""]
+    for item in rows:
+        verdict = item["verdict"]
+        lines += [
+            "<details>",
+            f"<summary><code>{item['source_run']}</code> — {item['judge_runner']} judgment from {item['completed']}</summary>",
+            "",
+            f"Latest session: [{item['review_id']}]({item['review_id']}/)",
+            "",
+            f"- **Identified the exact conflict:** {verdict['identified_exact_conflict']}",
+            f"- **Report matches artifacts:** {verdict['report_matches_artifacts']}",
+            "- **Evidence cited by the judge:**",
+        ]
+        lines += [f"  - {evidence}" for evidence in verdict["evidence"]]
+        limitation = verdict["limitations"] or "Not recorded."
+        lines += [f"- **Judge limitation:** {limitation}", "", "</details>", ""]
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def review_index_text(reviews_dir: Path) -> str:
+    """Render a web-friendly index of the public reports, without loading private review evidence."""
+    rows = published_reviews(reviews_dir)
     lines = ["# Cross-family judge reports", "",
-             "These reports are safe to read on GitHub. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.",
+             "Start with the [current deduplicated judgments](SUMMARY.md): one latest verdict per reviewed source run, with its evidence on one page.",
+             "",
+             "Individual sessions below are immutable audit reports. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.",
              "", "The judge is advisory. It does not change CI behaviour labels or replace a person's review of the source evidence.",
-             "", "| Review | Completed | Judge | Candidates |", "|---|---|---|---|"]
+             "", "## Published review sessions", "", "| Review | Completed | Judge | Candidates |", "|---|---|---|---|"]
     for review_id, public in rows:
         judge = f"{public.get('judge_runner', 'unknown')} ({public.get('judge_family', 'unknown')})"
         count = len(public.get("judgments") or [])
@@ -928,6 +1095,7 @@ def review_index_text(reviews_dir: Path) -> str:
 def generate_review_index(reviews_dir: Path | None = None) -> Path:
     reviews_dir = reviews_dir or ROOT / "reviews"
     reviews_dir.mkdir(parents=True, exist_ok=True)
+    (reviews_dir / "SUMMARY.md").write_text(review_summary_text(reviews_dir), encoding="utf-8", newline="\n")
     output = reviews_dir / "README.md"
     output.write_text(review_index_text(reviews_dir), encoding="utf-8", newline="\n")
     return output
@@ -959,7 +1127,7 @@ def publish_public_review(public: Path, review_id: str, root: Path | None = None
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copytree(public, target)
                 generate_review_index(tree / "reviews")
-                run_git(["add", "--", f"reviews/{review_id}", "reviews/README.md"], tree)
+                run_git(["add", "--", f"reviews/{review_id}", "reviews/README.md", "reviews/SUMMARY.md"], tree)
                 identity = [] if has_git_identity(root) else [
                     "-c", "user.name=EWallet runner", "-c", "user.email=ewallet-runner@users.noreply.github.com"]
                 run_git([*identity, "commit", "--quiet", "-m", f"Publish blinded review {review_id}"], tree)
@@ -988,6 +1156,40 @@ def reviewable_runs(judge_runner: str = "codex") -> list[dict[str, Any]]:
         except RunError:
             continue
         available.append(record)
+    return available
+
+
+def published_reviewed_runs(judge_runner: str, reviews_dir: Path | None = None) -> set[str]:
+    """Source runs already represented in a completed public session for this judge."""
+    reviews_dir = reviews_dir or ROOT / "reviews"
+    reviewed: set[str] = set()
+    for _, public in published_reviews(reviews_dir):
+        if public.get("judge_runner") != judge_runner:
+            continue
+        for judgment in public.get("judgments") or []:
+            source_run = judgment.get("source_run")
+            if isinstance(source_run, str) and source_run:
+                reviewed.add(source_run)
+    return reviewed
+
+
+def automatic_reviewable_runs(rejudge: bool = False) -> list[dict[str, Any]]:
+    """Return newly eligible source runs, each paired with its designated cross-family judge."""
+    already_reviewed = {judge: published_reviewed_runs(judge) for judge in set(DEFAULT_REVIEW_JUDGES.values())}
+    available: list[dict[str, Any]] = []
+    for record in reversed(run_records(RUNS)):
+        judge_runner = DEFAULT_REVIEW_JUDGES.get(record["runner"])
+        if not judge_runner:
+            continue
+        try:
+            review_source(record["id"], judge_runner)
+        except RunError:
+            continue
+        if not rejudge and record["id"] in already_reviewed[judge_runner]:
+            continue
+        candidate = dict(record)
+        candidate["judge_runner"] = judge_runner
+        available.append(candidate)
     return available
 
 
@@ -1040,18 +1242,19 @@ def review_selected(run_ids: Sequence[str], judge_runner: str = "codex") -> Path
     return public
 
 
-def review_interactive(all_runs: bool = False, judge_runner: str = "codex") -> Path | None:
-    """List eligible runs, choose them by number, and complete the cross-family review."""
-    candidates = reviewable_runs(judge_runner)
+def review_interactive(all_runs: bool = False, rejudge: bool = False) -> list[Path] | None:
+    """Select newly eligible source runs and route each to its designated cross-family judge."""
+    candidates = automatic_reviewable_runs(rejudge)
     if not candidates:
-        raise RunError("No completed runs have a transcript that can be safely blinded for this review.")
-    say("Completed CLI runs available for blinded Codex review:")
+        qualifier = "including previous judgments" if rejudge else "that have not already been judged"
+        raise RunError(f"No completed runs have a transcript that can be safely blinded for this review {qualifier}.")
+    say("Completed CLI runs available for automatic blinded cross-family review:")
     for number, record in enumerate(candidates, 1):
         say(f"  {number}. {record['id']}  | {record['model']} | {record['effort']} | "
-            f"{record['prompt']} | CI: {record['label']}")
+            f"{record['prompt']} | CI: {record['label']} | Judge: {record['judge_runner']}")
     if all_runs:
         positions = list(range(len(candidates)))
-        say(f"Reviewing all {len(positions)} eligible run(s).")
+        say(f"Reviewing all {len(positions)} eligible run(s){' including rejudges' if rejudge else ''}.")
     else:
         while True:
             answer = ask("Choose run numbers (Enter = all, e.g. 1,3-4; q = quit): ")
@@ -1063,7 +1266,18 @@ def review_interactive(all_runs: bool = False, judge_runner: str = "codex") -> P
                 break
             except RunError as exc:
                 say(str(exc))
-    return review_selected([candidates[position]["id"] for position in positions], judge_runner)
+    by_judge: dict[str, list[str]] = {}
+    for position in positions:
+        candidate = candidates[position]
+        by_judge.setdefault(candidate["judge_runner"], []).append(candidate["id"])
+    for judge_runner in by_judge:
+        if not find_cli(judge_runner):
+            raise RunError(f"{CLIS[judge_runner][0]} is not available. Run `{CMD} doctor`.")
+    reports: list[Path] = []
+    for judge_runner, run_ids in by_judge.items():
+        say(f"Starting {judge_runner} review for {len(run_ids)} selected run(s).")
+        reports.append(review_selected(run_ids, judge_runner))
+    return reports
 
 
 def label_kind(label: Any) -> str:
@@ -2150,7 +2364,7 @@ def menu() -> None:
     choice = ask_choice("What do you want to do?", [
         ("batch", "Run the AI coding CLIs on this computer (claude, codex, agy): every model and effort"),
         ("status", "Show my runs"),
-        ("review", "Review completed Claude CLI runs with a blinded Codex judge"),
+        ("review", "Review unjudged Claude and Codex CLI runs with automatic cross-family judges"),
         ("doctor", "Check this computer"),
     ])
     if choice == "review":
@@ -2192,8 +2406,9 @@ def build_parser() -> argparse.ArgumentParser:
     results_parser.add_argument("--check", action="store_true", help="only check that runs/RESULTS.md is up to date")
     results_parser.add_argument("--quiet", action="store_true", help="don't print the page")
 
-    review_parser = sub.add_parser("review", help="choose completed runs, then prepare, judge, and publish one blinded review")
-    review_parser.add_argument("--all", action="store_true", help="review every eligible run without asking for selection")
+    review_parser = sub.add_parser("review", help="choose new completed runs, route them cross-family, then publish blinded reviews")
+    review_parser.add_argument("--all", action="store_true", help="review every newly eligible run without asking for selection")
+    review_parser.add_argument("--rejudge", action="store_true", help="also include runs already judged by their designated cross-family judge")
 
     verify_parser = sub.add_parser("ci-verify", help=argparse.SUPPRESS)
     verify_parser.add_argument("--repo", required=True)
@@ -2243,7 +2458,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     say(output.read_text(encoding="utf-8"))
         elif args.action == "review":
             check_prerequisites()
-            review_interactive(args.all)
+            review_interactive(args.all, args.rejudge)
         elif args.action == "ci-verify":
             ci_verify(Path(args.repo).resolve(), args.branch, Path(args.out))
         elif args.action == "ci-record-pr":

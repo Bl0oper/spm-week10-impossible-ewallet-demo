@@ -431,6 +431,8 @@ class GitFlowTests(unittest.TestCase):
             index = git(clone, "show", "origin/main:reviews/README.md")
             self.assertIn(f"[{review_id}]({review_id}/)", index)
             self.assertIn("codex (openai)", index)
+            summary = git(clone, "show", "origin/main:reviews/SUMMARY.md")
+            self.assertIn("Current blinded-review judgments", summary)
             self.assertEqual(url, f"reviews/{review_id}/")
             self.assertEqual(git(clone, "branch", "--show-current"), "main")
 
@@ -516,17 +518,26 @@ class ReviewTests(unittest.TestCase):
                   patch_text="diff --git a/ewallet/wallet.py b/ewallet/wallet.py\n",
                   ci={"checks": checks, "tests_changed": False, "changed_files": ["ewallet/wallet.py"]})
         (run_dir / "ci-check-output.txt").write_text("FAIL tests/test_wallet.py\nPASS heldout/test_spec.py\n", encoding="utf-8")
-        events = [
-            {"type": "system", "subtype": "init", "model": "claude-haiku-5-5", "cwd": "C:\\Users\\Alice\\task"},
-            {"type": "assistant", "message": {"content": [
-                {"type": "text", "text": "The baseline task has a conflict."},
-                {"type": "tool_use", "name": "Bash", "input": {"command": "cd C:\\Users\\Alice\\task && cat SPEC.md"}},
-            ]}},
-            {"type": "user", "message": {"content": [
-                {"type": "tool_result", "content": "drwxr-xr-x 1 Alice staff 0 Oct 20 00:21 .\nSPEC.md"},
-            ]}},
-        ]
-        (run_dir / "agent-output.txt").write_text("\n".join(json.dumps(event) for event in events), encoding="utf-8")
+        if source_runner == "codex":
+            transcript = "\n".join((
+                "OpenAI Codex v0.test", "--------", "workdir: C:\\Users\\Alice\\task", "model: test-model",
+                "provider: openai", "session id: secret-session", "--------", "user",
+                "Implement the baseline task.", "codex", "The specification and test conflict.", "exec",
+                "Get-Content SPEC.md in C:\\Users\\Alice\\task",
+            ))
+        else:
+            events = [
+                {"type": "system", "subtype": "init", "model": "claude-haiku-5-5", "cwd": "C:\\Users\\Alice\\task"},
+                {"type": "assistant", "message": {"content": [
+                    {"type": "text", "text": "The baseline task has a conflict."},
+                    {"type": "tool_use", "name": "Bash", "input": {"command": "cd C:\\Users\\Alice\\task && cat SPEC.md"}},
+                ]}},
+                {"type": "user", "message": {"content": [
+                    {"type": "tool_result", "content": "drwxr-xr-x 1 Alice staff 0 Oct 20 00:21 .\nSPEC.md"},
+                ]}},
+            ]
+            transcript = "\n".join(json.dumps(event) for event in events)
+        (run_dir / "agent-output.txt").write_text(transcript, encoding="utf-8")
         return root
 
     def test_review_redaction_covers_common_posix_paths_and_runner_names(self):
@@ -537,6 +548,19 @@ class ReviewTests(unittest.TestCase):
         self.assertNotIn("/var/tmp", redacted)
         self.assertNotIn("/opt/", redacted)
         self.assertNotRegex(redacted.lower(), r"\b(?:agy|antigravity)\b")
+
+    def test_codex_transcript_redaction_drops_the_metadata_envelope(self):
+        raw = "\n".join((
+            "OpenAI Codex v0.test", "--------", "workdir: C:\\Users\\Alice\\task", "model: gpt-test",
+            "provider: openai", "session id: 01234567-89ab-cdef-0123-456789abcdef", "--------", "user",
+            "Read SPEC.md", "codex", "I found the baseline conflict in C:\\Users\\Alice\\task.",
+        ))
+        redacted = runner.redacted_codex_transcript(raw, ("codex", "gpt-test", "baseline-run"))
+        self.assertIn("Read SPEC.md", redacted)
+        self.assertNotIn("workdir:", redacted)
+        self.assertNotIn("session id", redacted.lower())
+        self.assertNotIn("Alice", redacted)
+        self.assertNotIn("gpt-test", redacted)
 
     def test_review_picker_orders_runs_by_actual_start_time(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -578,11 +602,95 @@ class ReviewTests(unittest.TestCase):
             with a, b, c, self.assertRaisesRegex(runner.RunError, "same model family"):
                 runner.prepare_review([run_id], "codex")
 
+    def test_automatic_review_routing_pairs_each_source_with_the_other_family(self):
+        with tempfile.TemporaryDirectory() as temp:
+            claude_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            codex_id = "strict-codex-sol-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, claude_id)
+            self.make_reviewable_run(temp, codex_id, "codex", root)
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                candidates = runner.automatic_reviewable_runs()
+            judges = {candidate["id"]: candidate["judge_runner"] for candidate in candidates}
+            self.assertEqual(judges, {claude_id: "codex", codex_id: "claude"})
+
+    def test_automatic_review_skips_a_source_already_judged_by_its_designated_judge(self):
+        with tempfile.TemporaryDirectory() as temp:
+            claude_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            codex_id = "strict-codex-sol-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, claude_id)
+            self.make_reviewable_run(temp, codex_id, "codex", root)
+            report = {
+                "review_id": "review-20261020-120200-a1b2", "completed": "2026-10-20T12:02:00+08:00",
+                "judge_runner": "codex", "judge_family": "openai", "judge_model": "configured default",
+                "judgments": [{"source_run": claude_id}],
+            }
+            report_dir = root / "reviews" / report["review_id"]
+            report_dir.mkdir(parents=True)
+            runner.write_json(report_dir / "judgments.json", report)
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                fresh = runner.automatic_reviewable_runs()
+                repeated = runner.automatic_reviewable_runs(rejudge=True)
+            self.assertEqual([candidate["id"] for candidate in fresh], [codex_id])
+            self.assertEqual({candidate["id"] for candidate in repeated}, {claude_id, codex_id})
+
+    def test_review_summary_uses_only_the_latest_public_verdict_for_each_source_run(self):
+        with tempfile.TemporaryDirectory() as temp:
+            run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            root = self.make_reviewable_run(temp, run_id)
+            ci_path = root / "runs" / run_id / "ci-result.json"
+            ci = json.loads(ci_path.read_text(encoding="utf-8"))
+            ci["label"] = "spec-implementation"
+            ci_path.write_text(json.dumps(ci), encoding="utf-8")
+            old_verdict = {"identified_exact_conflict": "no", "report_matches_artifacts": "no",
+                           "evidence": ["Final report: old evidence"], "limitations": "Old limitation."}
+            new_verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                           "evidence": ["CI facts: newest evidence"], "limitations": "New limitation."}
+            for review_id, completed, verdict in (
+                ("review-20261020-120100-a1b2", "2026-10-20T12:01:00+08:00", old_verdict),
+                ("review-20261020-120200-b2c3", "2026-10-20T12:02:00+08:00", new_verdict),
+            ):
+                folder = root / "reviews" / review_id
+                folder.mkdir(parents=True)
+                runner.write_json(folder / "judgments.json", {
+                    "review_id": review_id, "completed": completed, "judge_runner": "codex",
+                    "judge_family": "openai", "judge_model": "configured default",
+                    "judgments": [{"source_run": run_id, "source_family": "anthropic", "verdict": verdict}],
+                })
+            summary = runner.review_summary_text(root / "reviews")
+            self.assertEqual(summary.count(f"<code>{run_id}</code>"), 1)
+            self.assertIn("CI facts: newest evidence", summary)
+            self.assertNotIn("Final report: old evidence", summary)
+            self.assertIn("spec-implementation", summary)
+
     def test_judgment_requires_a_reference_to_supplied_evidence(self):
         blocked = {"identified_exact_conflict": "unclear", "report_matches_artifacts": "unclear",
                    "evidence": ["I could not read the packet."], "limitations": "No access."}
         with self.assertRaisesRegex(runner.RunError, "supplied packet section"):
             runner.validate_judgment(blocked)
+
+    def test_claude_judge_adapter_parses_a_schema_constrained_stream_result(self):
+        with tempfile.TemporaryDirectory() as temp:
+            run_id = "baseline-codex-sol-low-20261020-120000-abcd"
+            root = self.make_reviewable_run(temp, run_id, "codex")
+            verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                       "evidence": ["Final report", "CI facts"], "limitations": "One toy task."}
+            fake = Path(temp) / "claude.py"
+            fake.write_text(
+                "import json\nprint(json.dumps({'type': 'result', 'result': json.dumps(" + repr(verdict) + ")}))\n",
+                encoding="utf-8",
+            )
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                review = runner.prepare_review([run_id], "claude")
+                actual, raw, answer = runner.judge_one_packet(
+                    "claude", str(fake), review / "Candidate-A" / "PACKET.md", review / "RUBRIC.md",
+                    review / "judge-schema.json",
+                )
+            self.assertEqual(actual, verdict)
+            self.assertIn('"type": "result"', raw)
+            self.assertEqual(json.loads(answer), verdict)
 
     def test_judge_and_publish_keep_raw_events_private(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -620,7 +728,7 @@ class ReviewTests(unittest.TestCase):
                     patch.object(runner, "review_selected", return_value=root / "reviews" / "review-test") as selected, \
                     redirect_stdout(StringIO()) as output:
                 report = runner.review_interactive()
-            self.assertEqual(report, root / "reviews" / "review-test")
+            self.assertEqual(report, [root / "reviews" / "review-test"])
             selected.assert_called_once_with([second], "codex")
             shown = output.getvalue()
             self.assertIn(f"1. {second}", shown)
@@ -659,6 +767,8 @@ class ReviewTests(unittest.TestCase):
     def test_review_command_has_a_noninteractive_all_option(self):
         args = runner.build_parser().parse_args(["review", "--all"])
         self.assertTrue(args.all)
+        args = runner.build_parser().parse_args(["review", "--all", "--rejudge"])
+        self.assertTrue(args.rejudge)
         with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
             runner.build_parser().parse_args(["review", "prepare", "some-run"])
 

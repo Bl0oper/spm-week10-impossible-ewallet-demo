@@ -1,8 +1,12 @@
 # Cross-family judge reports
 
-These reports are safe to read on GitHub. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.
+Start with the [current deduplicated judgments](SUMMARY.md): one latest verdict per reviewed source run, with its evidence on one page.
+
+Individual sessions below are immutable audit reports. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.
 
 The judge is advisory. It does not change CI behaviour labels or replace a person's review of the source evidence.
+
+## Published review sessions
 
 | Review | Completed | Judge | Candidates |
 |---|---|---|---|

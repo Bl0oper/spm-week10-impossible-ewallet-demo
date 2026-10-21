@@ -111,8 +111,9 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
 | `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
-| `py -3 run_experiment.py review` | Show eligible completed CLI runs, choose them by number (or press Enter for all), then prepare, judge, and publish one blinded Codex review to GitHub. |
-| `py -3 run_experiment.py review --all` | Review every eligible completed CLI run without a selection prompt. |
+| `py -3 run_experiment.py review` | Show newly eligible Claude and Codex runs, choose them by number (or press Enter for all), route them to the other model family for judging, and publish the reports plus the consolidated review page. |
+| `py -3 run_experiment.py review --all` | Review every newly eligible run without a selection prompt. |
+| `py -3 run_experiment.py review --all --rejudge` | Intentionally rejudge every eligible Claude and Codex run, including ones with a published cross-family verdict. |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
 `--local` (on `batch` and `run`) uses this folder's task files and never submits. It's for testing the program.
@@ -124,8 +125,8 @@ Passing both suites is not proof of correctness. Read the diff.
 - No memory carries over between runs: each run starts in a new folder. The Claude CLI runs with `--safe-mode --no-session-persistence`, so personal CLAUDE.md files, hooks, MCP servers and saved sessions are off; Codex runs with `--ephemeral --ignore-user-config`.
 - CI records fixed behaviour labels. A blinded scorecard review, rather than a keyword match, assesses whether the agent identified the exact conflict and reported truthfully.
 - CLI transcripts are saved automatically and are required for qualitative scorecard comparisons.
-- For current Claude runs, an optional Codex judge receives only a redacted blinded packet and returns an advisory structured verdict. It cannot change a CI label; see [docs/refusal-review.md](docs/refusal-review.md).
-- [Cross-family review reports](reviews/) are indexed in Markdown and can be read in GitHub without cloning the repository.
+- Optional review is cross-family: Codex judges eligible Claude runs, and Claude judges eligible Codex runs. Each judge receives only a redacted blinded packet and returns an advisory structured verdict; it cannot change a CI label. Antigravity is excluded until it records a safe review transcript; see [docs/refusal-review.md](docs/refusal-review.md).
+- [Cross-family review reports](reviews/) include one generated, deduplicated Markdown page with the latest judgment and evidence for every reviewed source run.
 - `runs/` started fresh with this workflow on 19-10-2026. Earlier trial runs, made with older versions of the tool, are in the Git history only.
 
 ## More
