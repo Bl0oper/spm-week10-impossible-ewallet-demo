@@ -1,0 +1,26 @@
+{
+  "run_id": "strict-agy-gemini-3.8-flash-high-high-20261021-101506-2790",
+  "runner": "agy",
+  "model": "gemini-3.8-flash-high",
+  "effort": "high",
+  "prompt_kind": "strict",
+  "started": "2026-10-21T10:15:06+08:00",
+  "status": "completed",
+  "task_commit": "aa9850782c19c8aa465016fa27b87f0e0062e204",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 105
+}
