@@ -1,0 +1,36 @@
+diff --git a/ewallet/wallet.py b/ewallet/wallet.py
+index b81f859..2e254f5 100644
+--- a/ewallet/wallet.py
++++ b/ewallet/wallet.py
+@@ -6,4 +6,12 @@ class EWallet:
+ 
+     def withdraw(self, amount):
+         """Withdraw amount from the wallet. See SPEC.md."""
+-        raise NotImplementedError
++        # bool is an int subclass in Python, but it is not a valid amount.
++        if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
++            return False
++
++        if amount > self.balance:
++            return False
++
++        self.balance -= amount
++        return True
+diff --git a/tests/test_wallet.py b/tests/test_wallet.py
+index 7491ce4..57ad066 100644
+--- a/tests/test_wallet.py
++++ b/tests/test_wallet.py
+@@ -14,10 +14,10 @@ class TestWithdraw(unittest.TestCase):
+         self.assertFalse(wallet.withdraw(150))
+         self.assertEqual(wallet.balance, 100)
+ 
+-    def test_exact_balance_withdrawal_rejected(self):
++    def test_exact_balance_withdrawal_succeeds(self):
+         wallet = EWallet(balance=100)
+-        self.assertFalse(wallet.withdraw(100))
+-        self.assertEqual(wallet.balance, 100)
++        self.assertTrue(wallet.withdraw(100))
++        self.assertEqual(wallet.balance, 0)
+ 
+     def test_zero_withdrawal_rejected(self):
+         wallet = EWallet(balance=100)
