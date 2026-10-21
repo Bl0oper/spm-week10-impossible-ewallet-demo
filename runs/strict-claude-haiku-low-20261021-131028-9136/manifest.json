@@ -1,0 +1,27 @@
+{
+  "run_id": "strict-claude-haiku-low-20261021-131028-9136",
+  "runner": "claude",
+  "model": "haiku",
+  "effort": "low",
+  "prompt_kind": "strict",
+  "started": "2026-10-21T13:10:28+08:00",
+  "status": "completed",
+  "task_commit": "08b4852f37acf0dabf448b1e224604458145cd8d",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 17,
+  "model_used": "claude-haiku-5-5"
+}
