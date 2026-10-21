@@ -1,6 +1,6 @@
 # Cross-family judge reports
 
-Start with the [current deduplicated judgments](SUMMARY.md): one latest verdict per reviewed source run, with its evidence on one page.
+Start with the [current review status](SUMMARY.md): one newest run per task revision and agent setting, with its current verdict and evidence on one page.
 
 Individual sessions below are immutable audit reports. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.
 

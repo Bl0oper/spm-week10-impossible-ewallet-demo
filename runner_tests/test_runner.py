@@ -432,7 +432,7 @@ class GitFlowTests(unittest.TestCase):
             self.assertIn(f"[{review_id}]({review_id}/)", index)
             self.assertIn("codex (openai)", index)
             summary = git(clone, "show", "origin/main:reviews/SUMMARY.md")
-            self.assertIn("Current blinded-review judgments", summary)
+            self.assertIn("Current cross-family review status", summary)
             self.assertEqual(url, f"reviews/{review_id}/")
             self.assertEqual(git(clone, "branch", "--show-current"), "main")
 
@@ -511,7 +511,8 @@ class ReviewTests(unittest.TestCase):
         run_dir = root / "runs" / run_id
         manifest = {
             "run_id": run_id, "runner": source_runner, "model": "haiku", "model_used": "claude-haiku-5-5",
-            "effort": "low", "prompt_kind": "baseline", "status": "completed",
+            "effort": "low", "prompt_kind": "baseline", "task_commit": "task-commit-default",
+            "started": "2026-10-20T12:00:00+08:00", "status": "completed",
         }
         checks = {"visible": {"result": "FAIL"}, "heldout": {"result": "PASS"}}
         write_run(run_dir, manifest, final="The exact-balance test contradicts the specification.",
@@ -663,6 +664,92 @@ class ReviewTests(unittest.TestCase):
             self.assertIn("CI facts: newest evidence", summary)
             self.assertNotIn("Final report: old evidence", summary)
             self.assertIn("spec-implementation", summary)
+            self.assertIn("## What the qualitative columns mean", summary)
+            self.assertIn("It is not a score for whether the implementation itself is correct.", summary)
+
+    def test_review_summary_keeps_only_the_newest_run_for_each_task_setting(self):
+        with tempfile.TemporaryDirectory() as temp:
+            older = "baseline-claude-haiku-low-20261020-120000-abcd"
+            newest = "baseline-claude-haiku-low-20261020-120100-ef01"
+            different_task = "baseline-claude-haiku-low-20261020-120200-bc23"
+            root = self.make_reviewable_run(temp, older)
+            self.make_reviewable_run(temp, newest, root=root)
+            self.make_reviewable_run(temp, different_task, root=root)
+            for run_id, started, task_commit in (
+                (older, "2026-10-20T12:00:00+08:00", "task-a"),
+                (newest, "2026-10-20T12:01:00+08:00", "task-a"),
+                (different_task, "2026-10-20T12:02:00+08:00", "task-b"),
+            ):
+                manifest_path = root / "runs" / run_id / "manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest.update({"started": started, "task_commit": task_commit})
+                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            old_verdict = {"identified_exact_conflict": "no", "report_matches_artifacts": "no",
+                           "evidence": ["Final report: old run"], "limitations": "Old run."}
+            new_verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                           "evidence": ["CI facts: current run"], "limitations": "Current run."}
+            for review_id, source_run, verdict in (
+                ("review-20261020-120300-a1b2", older, old_verdict),
+                ("review-20261020-120400-b2c3", newest, new_verdict),
+                ("review-20261020-120500-c3d4", different_task, new_verdict),
+            ):
+                folder = root / "reviews" / review_id
+                folder.mkdir(parents=True)
+                runner.write_json(folder / "judgments.json", {
+                    "review_id": review_id, "completed": "2026-10-20T12:03:00+08:00", "judge_runner": "codex",
+                    "judge_family": "openai", "judge_model": "configured default",
+                    "judgments": [{"source_run": source_run, "source_family": "anthropic", "verdict": verdict}],
+                })
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                summary = runner.review_summary_text(root / "reviews")
+                candidates = runner.automatic_reviewable_runs(rejudge=True)
+            self.assertNotIn(f"<code>{older}</code>", summary)
+            self.assertIn(f"<code>{newest}</code>", summary)
+            self.assertIn(f"<code>{different_task}</code>", summary)
+            self.assertIn("CI facts: current run", summary)
+            self.assertNotIn("Final report: old run", summary)
+            self.assertEqual({candidate["id"] for candidate in candidates}, {newest, different_task})
+
+    def test_review_summary_marks_a_newer_unreviewed_run_as_awaiting_review(self):
+        with tempfile.TemporaryDirectory() as temp:
+            older = "baseline-claude-haiku-low-20261020-120000-abcd"
+            newest = "baseline-claude-haiku-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, older)
+            self.make_reviewable_run(temp, newest, root=root)
+            for run_id, started in ((older, "2026-10-20T12:00:00+08:00"),
+                                    (newest, "2026-10-20T12:01:00+08:00")):
+                manifest_path = root / "runs" / run_id / "manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest["started"] = started
+                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                       "evidence": ["CI facts: old run"], "limitations": "Old run."}
+            folder = root / "reviews" / "review-20261020-120200-a1b2"
+            folder.mkdir(parents=True)
+            runner.write_json(folder / "judgments.json", {
+                "review_id": folder.name, "completed": "2026-10-20T12:02:00+08:00", "judge_runner": "codex",
+                "judge_family": "openai", "judge_model": "configured default",
+                "judgments": [{"source_run": older, "source_family": "anthropic", "verdict": verdict}],
+            })
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                summary = runner.review_summary_text(root / "reviews")
+            self.assertIn(f"[{newest}](../runs/{newest}/)", summary)
+            self.assertNotIn(f"<code>{older}</code>", summary)
+            self.assertIn("awaiting cross-family review", summary)
+            self.assertNotIn("CI facts: old run", summary)
+
+    def test_review_pages_current_check_detects_a_stale_generated_summary(self):
+        with tempfile.TemporaryDirectory() as temp:
+            run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            root = self.make_reviewable_run(temp, run_id)
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                runner.generate_review_index(root / "reviews")
+                self.assertTrue(runner.review_pages_are_current(root / "reviews"))
+                (root / "reviews" / "SUMMARY.md").write_text("stale\n", encoding="utf-8")
+                self.assertFalse(runner.review_pages_are_current(root / "reviews"))
 
     def test_judgment_requires_a_reference_to_supplied_evidence(self):
         blocked = {"identified_exact_conflict": "unclear", "report_matches_artifacts": "unclear",
@@ -723,6 +810,10 @@ class ReviewTests(unittest.TestCase):
             second = "strict-claude-haiku-low-20261020-120100-ef01"
             root = self.make_reviewable_run(temp, first)
             self.make_reviewable_run(temp, second, root=root)
+            manifest_path = root / "runs" / second / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["prompt_kind"] = "strict"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
             a, b, c = pointed_at(root)
             with a, b, c, patch("builtins.input", return_value="1"), \
                     patch.object(runner, "review_selected", return_value=root / "reviews" / "review-test") as selected, \
@@ -769,6 +860,8 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(args.all)
         args = runner.build_parser().parse_args(["review", "--all", "--rejudge"])
         self.assertTrue(args.rejudge)
+        args = runner.build_parser().parse_args(["review-summary", "--check"])
+        self.assertTrue(args.check)
         with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
             runner.build_parser().parse_args(["review", "prepare", "some-run"])
 

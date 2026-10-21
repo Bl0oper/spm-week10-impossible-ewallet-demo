@@ -26,3 +26,5 @@ jobs:
       - run: python -m unittest discover -s runner_tests -t . -v
       # The committed results page must match the run folders it is built from.
       - run: python run_experiment.py results --check
+      # The committed review pages must match source runs and public review reports.
+      - run: python run_experiment.py review-summary --check

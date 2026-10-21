@@ -78,7 +78,7 @@ Run `py -3 run_experiment.py status`. It lists each of your runs as:
 - **merged**: done, with its label;
 - **not merged**: CI rejected or failed. The Actions tab shows the reason in one line.
 
-If the page itself looks out of date, run the **rebuild-results** workflow from the Actions tab. It also runs every night. The page is rebuilt from all run folders each time, so a later rebuild fixes an earlier one that failed.
+If a generated page looks out of date, run the **rebuild-derived-pages** workflow from the Actions tab. It also runs every night. The pages are rebuilt from their source folders each time, so a later rebuild fixes an earlier one that failed.
 
 ## Reading a run
 
@@ -111,9 +111,10 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
 | `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
-| `py -3 run_experiment.py review` | Show newly eligible Claude and Codex runs, choose them by number (or press Enter for all), route them to the other model family for judging, and publish the reports plus the consolidated review page. |
-| `py -3 run_experiment.py review --all` | Review every newly eligible run without a selection prompt. |
-| `py -3 run_experiment.py review --all --rejudge` | Intentionally rejudge every eligible Claude and Codex run, including ones with a published cross-family verdict. |
+| `py -3 run_experiment.py review` | Show the newest eligible Claude or Codex run for each task revision and configuration, choose by number (or press Enter for all), route it to the other model family, and publish the report plus the consolidated review page. |
+| `py -3 run_experiment.py review --all` | Review every newly eligible current setting without a selection prompt. |
+| `py -3 run_experiment.py review --all --rejudge` | Intentionally rejudge every current setting, including one with a published cross-family verdict. |
+| `py -3 run_experiment.py review-summary --check` | Verify that the generated review summary and index match all runs and public review reports. |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
 `--local` (on `batch` and `run`) uses this folder's task files and never submits. It's for testing the program.
@@ -126,7 +127,7 @@ Passing both suites is not proof of correctness. Read the diff.
 - CI records fixed behaviour labels. A blinded scorecard review, rather than a keyword match, assesses whether the agent identified the exact conflict and reported truthfully.
 - CLI transcripts are saved automatically and are required for qualitative scorecard comparisons.
 - Optional review is cross-family: Codex judges eligible Claude runs, and Claude judges eligible Codex runs. Each judge receives only a redacted blinded packet and returns an advisory structured verdict; it cannot change a CI label. Antigravity is excluded until it records a safe review transcript; see [docs/refusal-review.md](docs/refusal-review.md).
-- [Cross-family review reports](reviews/) include one generated, deduplicated Markdown page with the latest judgment and evidence for every reviewed source run.
+- [Cross-family review reports](reviews/) include one generated Markdown page with the newest run, current verdict, and evidence for every task revision and agent configuration. Older repeats remain in the audit history rather than repeating in the current view.
 - `runs/` started fresh with this workflow on 19-10-2026. Earlier trial runs, made with older versions of the tool, are in the Git history only.
 
 ## More

@@ -1,7 +1,7 @@
 # Run results
 
 Built by CI from every folder in `runs/` each time a run is merged into `main`. Don't edit this file: it is
-rebuilt from scratch every time. To rebuild it now, run the **rebuild-results** workflow from the Actions tab.
+rebuilt from scratch every time. To rebuild it now, run the **rebuild-derived-pages** workflow from the Actions tab.
 
 The behaviour labels below are fixed CI facts, not verdicts about honesty. The refusal scorecard keeps
 semantic questions for blinded review. This is a small class experiment on one toy task, not a benchmark,

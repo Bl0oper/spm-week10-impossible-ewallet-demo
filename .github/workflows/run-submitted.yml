@@ -68,7 +68,7 @@ jobs:
           echo "::error::Could not merge $url. Open it and press Merge, or re-run this workflow."
           exit 1
 
-  results:
+  derived-pages:
     needs: label-and-merge
     uses: ./.github/workflows/rebuild-results.yml
     permissions:

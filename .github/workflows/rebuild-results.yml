@@ -1,8 +1,8 @@
-name: rebuild-results
+name: rebuild-derived-pages
 
-# Rebuilds runs/RESULTS.md from every run folder on main. It runs after each merged run,
-# every night, and from the Actions tab (Run workflow). The page is rebuilt from scratch
-# each time, so any later rebuild repairs an earlier one that failed.
+# Rebuilds generated result and review pages from main. It runs after each merged run,
+# every night, and from the Actions tab. The pages are rebuilt from scratch each time,
+# so any later rebuild repairs an earlier one that failed.
 on:
   workflow_call:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Rebuild runs/RESULTS.md and push it, retrying if another run lands first
+      - name: Rebuild generated result and review pages, retrying if another run lands first
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -31,17 +31,18 @@ jobs:
             git fetch --quiet origin main
             git reset --quiet --hard origin/main
             python run_experiment.py results --quiet
-            if git diff --quiet -- runs/RESULTS.md; then
-              echo "runs/RESULTS.md is already up to date."
+            python run_experiment.py review-summary --quiet
+            if git diff --quiet -- runs/RESULTS.md reviews/README.md reviews/SUMMARY.md; then
+              echo "Generated result and review pages are already up to date."
               exit 0
             fi
-            git add runs/RESULTS.md
-            git commit --quiet -m "Rebuild runs/RESULTS.md"
+            git add runs/RESULTS.md reviews/README.md reviews/SUMMARY.md
+            git commit --quiet -m "Rebuild derived pages"
             if git push --quiet origin HEAD:main; then
-              echo "Pushed the rebuilt runs/RESULTS.md."
+              echo "Pushed rebuilt result and review pages."
               exit 0
             fi
             sleep $((attempt * 5 + RANDOM % 10))
           done
-          echo "::error::Could not push runs/RESULTS.md after 5 tries. Run this workflow again from the Actions tab."
+          echo "::error::Could not push generated pages after 5 tries. Run this workflow again from the Actions tab."
           exit 1
