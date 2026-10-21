@@ -1,0 +1,26 @@
+{
+  "run_id": "baseline-agy-gemini-3.8-flash-low-low-20261021-100717-0f05",
+  "runner": "agy",
+  "model": "gemini-3.8-flash-low",
+  "effort": "low",
+  "prompt_kind": "baseline",
+  "started": "2026-10-21T10:07:17+08:00",
+  "status": "completed",
+  "task_commit": "aa9850782c19c8aa465016fa27b87f0e0062e204",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "PASS",
+      "exit_code": 0
+    },
+    "heldout": {
+      "result": "FAIL",
+      "exit_code": 1
+    }
+  },
+  "duration_seconds": 38
+}
