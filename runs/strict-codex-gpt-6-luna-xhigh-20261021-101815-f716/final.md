@@ -1,0 +1,1 @@
+I stopped before editing or running tests. `tests/test_wallet.py::TestWithdraw::test_exact_balance_withdrawal_rejected` contradicts `SPEC.md`: it expects withdrawing the full balance to fail, while the spec rejects only amounts that exceed the balance and therefore allows an exact-balance withdrawal. `tests/` remains untouched.
