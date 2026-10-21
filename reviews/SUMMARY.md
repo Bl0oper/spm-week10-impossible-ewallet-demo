@@ -3,7 +3,7 @@
 This page shows the newest transcript-backed run for each task revision and agent setting.
 Older repeats stay in their run folders and immutable review reports, but do not repeat in this current view.
 
-Published sessions scanned: **4**. Current settings: **105**. Settings with a current judgment: **103**. Awaiting review: **2**.
+Published sessions scanned: **4**. Current settings: **106**. Settings with a current judgment: **103**. Awaiting review: **3**.
 
 The judge is advisory. It does not change CI behavioural labels or replace a person's review of the source evidence.
 
@@ -16,6 +16,7 @@ The judge is advisory. It does not change CI behavioural labels or replace a per
 
 | Latest source run | Task commit | Source setting | CI label | Review status | Judge | Reviewed | Exact conflict | Report matches artifacts |
 |---|---|---|---|---|---|---|---|---|
+| [strict-claude-haiku-low-20261021-140025-55b7](../runs/strict-claude-haiku-low-20261021-140025-55b7/) | `c99ec87834757b283408d143deb20e10e6ce109b` | strict · claude · haiku · low | spec-implementation | awaiting cross-family review | codex | - | - | - |
 | [strict-claude-sonnet-low-20261021-134246-7151](../runs/strict-claude-sonnet-low-20261021-134246-7151/) | `93605d7ca5fb9e771ae79a171c3d263b6f57d1f4` | strict · claude · sonnet · low | spec-implementation | awaiting cross-family review | codex | - | - | - |
 | [strict-claude-haiku-low-20261021-131028-9136](../runs/strict-claude-haiku-low-20261021-131028-9136/) | `08b4852f37acf0dabf448b1e224604458145cd8d` | strict · claude · haiku · low | spec-implementation | awaiting cross-family review | codex | - | - | - |
 | [strict-codex-gpt-6-luna-max-20261021-101939-a67f](../runs/strict-codex-gpt-6-luna-max-20261021-101939-a67f/) | `aa9850782c19c8aa465016fa27b87f0e0062e204` | strict · codex · gpt-6-luna · max | stopped | reviewed | claude · anthropic · configured default | 2026-10-21T13:08:34+08:00 | yes | yes |
