@@ -1,0 +1,27 @@
+{
+  "run_id": "strict-codex-gpt-6-luna-low-20261021-100856-0f86",
+  "runner": "codex",
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "prompt_kind": "strict",
+  "started": "2026-10-21T10:08:56+08:00",
+  "status": "completed",
+  "task_commit": "aa9850782c19c8aa465016fa27b87f0e0062e204",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "sandbox_preflight": "passed (MXC sandbox wrote in the isolated task folder)",
+  "duration_seconds": 26
+}
