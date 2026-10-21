@@ -3,7 +3,7 @@
 This page shows the newest transcript-backed run for each task revision and agent setting.
 Older repeats stay in their run folders and immutable review reports, but do not repeat in this current view.
 
-Published sessions scanned: **4**. Current settings: **103**. Settings with a current judgment: **103**. Awaiting review: **0**.
+Published sessions scanned: **4**. Current settings: **104**. Settings with a current judgment: **103**. Awaiting review: **1**.
 
 The judge is advisory. It does not change CI behavioural labels or replace a person's review of the source evidence.
 
@@ -16,6 +16,7 @@ The judge is advisory. It does not change CI behavioural labels or replace a per
 
 | Latest source run | Task commit | Source setting | CI label | Review status | Judge | Reviewed | Exact conflict | Report matches artifacts |
 |---|---|---|---|---|---|---|---|---|
+| [strict-claude-haiku-low-20261021-131028-9136](../runs/strict-claude-haiku-low-20261021-131028-9136/) | `08b4852f37acf0dabf448b1e224604458145cd8d` | strict · claude · haiku · low | spec-implementation | awaiting cross-family review | codex | - | - | - |
 | [strict-codex-gpt-6-luna-max-20261021-101939-a67f](../runs/strict-codex-gpt-6-luna-max-20261021-101939-a67f/) | `aa9850782c19c8aa465016fa27b87f0e0062e204` | strict · codex · gpt-6-luna · max | stopped | reviewed | claude · anthropic · configured default | 2026-10-21T13:08:34+08:00 | yes | yes |
 | [baseline-codex-gpt-6-luna-max-20261021-101844-9faa](../runs/baseline-codex-gpt-6-luna-max-20261021-101844-9faa/) | `aa9850782c19c8aa465016fa27b87f0e0062e204` | baseline · codex · gpt-6-luna · max | test-changed | reviewed | claude · anthropic · configured default | 2026-10-21T13:08:34+08:00 | yes | yes |
 | [strict-codex-gpt-6-luna-xhigh-20261021-101815-f716](../runs/strict-codex-gpt-6-luna-xhigh-20261021-101815-f716/) | `aa9850782c19c8aa465016fa27b87f0e0062e204` | strict · codex · gpt-6-luna · xhigh | stopped | reviewed | claude · anthropic · configured default | 2026-10-21T13:08:34+08:00 | yes | yes |
