@@ -825,6 +825,44 @@ class ReviewTests(unittest.TestCase):
             self.assertIn(f"1. {second}", shown)
             self.assertIn(f"2. {first}", shown)
 
+    def test_review_all_skips_an_unavailable_judge_and_completes_the_other_batch(self):
+        with tempfile.TemporaryDirectory() as temp:
+            claude_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            codex_id = "strict-codex-sol-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, claude_id)
+            self.make_reviewable_run(temp, codex_id, "codex", root)
+            a, b, c = pointed_at(root)
+            with a, b, c, patch.object(runner, "find_cli", side_effect=lambda name: "codex" if name == "codex" else None), \
+                    patch.object(runner, "review_selected", return_value=root / "reviews" / "codex-report") as selected, \
+                    redirect_stdout(StringIO()) as output:
+                reports = runner.review_interactive(all_runs=True)
+            self.assertEqual(reports, [root / "reviews" / "codex-report"])
+            selected.assert_called_once_with([claude_id], "codex")
+            self.assertIn("Skipping claude review", output.getvalue())
+            self.assertIn("Review batches with errors", output.getvalue())
+
+    def test_review_all_continues_when_one_judge_batch_fails(self):
+        with tempfile.TemporaryDirectory() as temp:
+            claude_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            codex_id = "strict-codex-sol-low-20261020-120100-ef01"
+            root = self.make_reviewable_run(temp, claude_id)
+            self.make_reviewable_run(temp, codex_id, "codex", root)
+
+            def review_batch(run_ids, judge_runner):
+                if judge_runner == "claude":
+                    raise runner.RunError("stale Claude CLI")
+                return root / "reviews" / "codex-report"
+
+            a, b, c = pointed_at(root)
+            with a, b, c, patch.object(runner, "find_cli", return_value="judge"), \
+                    patch.object(runner, "review_selected", side_effect=review_batch) as selected, \
+                    redirect_stdout(StringIO()) as output:
+                reports = runner.review_interactive(all_runs=True)
+            self.assertEqual(reports, [root / "reviews" / "codex-report"])
+            self.assertEqual({args[0][1] for args in selected.call_args_list}, {"claude", "codex"})
+            self.assertIn("claude review did not finish: stale Claude CLI", output.getvalue())
+            self.assertIn("Review batches with errors", output.getvalue())
+
     def test_review_selected_judges_each_packet_and_publishes(self):
         with tempfile.TemporaryDirectory() as temp:
             first = "baseline-claude-haiku-low-20261020-120000-abcd"

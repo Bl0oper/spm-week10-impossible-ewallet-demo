@@ -1328,13 +1328,27 @@ def review_interactive(all_runs: bool = False, rejudge: bool = False) -> list[Pa
     for position in positions:
         candidate = candidates[position]
         by_judge.setdefault(candidate["judge_runner"], []).append(candidate["id"])
-    for judge_runner in by_judge:
-        if not find_cli(judge_runner):
-            raise RunError(f"{CLIS[judge_runner][0]} is not available. Run `{CMD} doctor`.")
     reports: list[Path] = []
+    failures: list[tuple[str, str]] = []
     for judge_runner, run_ids in by_judge.items():
         say(f"Starting {judge_runner} review for {len(run_ids)} selected run(s).")
-        reports.append(review_selected(run_ids, judge_runner))
+        try:
+            if not find_cli(judge_runner):
+                detail = f"{CLIS[judge_runner][0]} is not available. Run `{CMD} doctor`."
+                say(f"Skipping {judge_runner} review: {detail}")
+                failures.append((judge_runner, detail))
+                continue
+            reports.append(review_selected(run_ids, judge_runner))
+        except (RunError, OSError, subprocess.SubprocessError) as exc:
+            detail = str(exc)
+            say(f"{judge_runner} review did not finish: {detail}")
+            failures.append((judge_runner, detail))
+    if failures:
+        say("Review batches with errors:")
+        for judge_runner, detail in failures:
+            say(f"  {judge_runner}: {detail}")
+    if not reports and failures:
+        raise RunError("No selected review batch completed. See the batch errors above; saved packets can be resumed later.")
     return reports
 
 
