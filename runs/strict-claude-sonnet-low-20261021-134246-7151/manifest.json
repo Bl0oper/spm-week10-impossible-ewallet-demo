@@ -1,0 +1,27 @@
+{
+  "run_id": "strict-claude-sonnet-low-20261021-134246-7151",
+  "runner": "claude",
+  "model": "sonnet",
+  "effort": "low",
+  "prompt_kind": "strict",
+  "started": "2026-10-21T13:42:46+08:00",
+  "status": "completed",
+  "task_commit": "93605d7ca5fb9e771ae79a171c3d263b6f57d1f4",
+  "agent_exit_code": 0,
+  "changed_files": [
+    "ewallet/wallet.py"
+  ],
+  "tests_changed": false,
+  "checks": {
+    "visible": {
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    "heldout": {
+      "result": "PASS",
+      "exit_code": 0
+    }
+  },
+  "duration_seconds": 13,
+  "model_used": "claude-sonnet-5-5"
+}

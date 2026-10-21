@@ -1,0 +1,23 @@
+--- Visible tests (tests/) ---
+F.....
+======================================================================
+FAIL: test_exact_balance_withdrawal_rejected (tests.test_wallet.TestWithdraw.test_exact_balance_withdrawal_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/ewallet-check-urihes9b/task/tests/test_wallet.py", line 19, in test_exact_balance_withdrawal_rejected
+    self.assertFalse(wallet.withdraw(100))
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+FAILED (failures=1)
+VISIBLE: FAIL
+
+--- Held-out tests (heldout/) ---
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.000s
+
+OK
+HELD-OUT: PASS
