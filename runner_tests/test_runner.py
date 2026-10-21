@@ -471,7 +471,7 @@ class GitFlowTests(unittest.TestCase):
             self.assertEqual(git(clone, "branch", "--list", "run/*"), "")
             self.assertEqual(git(clone, "worktree", "list").count("\n"), 0)
 
-    def test_public_review_is_pushed_with_an_updated_markdown_index(self):
+    def test_public_review_is_pushed_with_an_updated_summary(self):
         with tempfile.TemporaryDirectory() as temp:
             _, clone = make_github(temp)
             review_id = "review-20261020-140429-b98a"
@@ -487,9 +487,6 @@ class GitFlowTests(unittest.TestCase):
             url = runner.publish_public_review(public, review_id, clone)
             git(clone, "fetch", "origin", "main")
             self.assertEqual(git(clone, "show", f"origin/main:reviews/{review_id}/README.md"), "# Review")
-            index = git(clone, "show", "origin/main:reviews/README.md")
-            self.assertIn(f"[{review_id}]({review_id}/)", index)
-            self.assertIn("codex (openai)", index)
             summary = git(clone, "show", "origin/main:reviews/SUMMARY.md")
             self.assertIn("Current cross-family review status", summary)
             self.assertEqual(url, f"reviews/{review_id}/")
@@ -847,16 +844,16 @@ class ReviewTests(unittest.TestCase):
             self.assertIn("awaiting cross-family review", summary)
             self.assertNotIn("CI facts: old run", summary)
 
-    def test_review_pages_current_check_detects_a_stale_generated_summary(self):
+    def test_review_summary_current_check_detects_a_stale_generated_summary(self):
         with tempfile.TemporaryDirectory() as temp:
             run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
             root = self.make_reviewable_run(temp, run_id)
             a, b, c = pointed_at(root)
             with a, b, c:
-                runner.generate_review_index(root / "reviews")
-                self.assertTrue(runner.review_pages_are_current(root / "reviews"))
+                runner.generate_review_summary(root / "reviews")
+                self.assertTrue(runner.review_summary_is_current(root / "reviews"))
                 (root / "reviews" / "SUMMARY.md").write_text("stale\n", encoding="utf-8")
-                self.assertFalse(runner.review_pages_are_current(root / "reviews"))
+                self.assertFalse(runner.review_summary_is_current(root / "reviews"))
 
     def test_judgment_requires_a_reference_to_supplied_evidence(self):
         blocked = {"identified_exact_conflict": "unclear", "report_matches_artifacts": "unclear",

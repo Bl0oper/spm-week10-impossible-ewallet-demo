@@ -1183,42 +1183,20 @@ def review_summary_text(reviews_dir: Path) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def review_index_text(reviews_dir: Path) -> str:
-    """Render a web-friendly index of the public reports, without loading private review evidence."""
-    rows = published_reviews(reviews_dir)
-    lines = ["# Cross-family judge reports", "",
-             "Start with the [current review status](SUMMARY.md): one newest run per task revision and agent setting, with its current verdict and evidence on one page.",
-             "",
-             "Individual sessions below are immutable audit reports. They contain the structured verdicts, evidence references, and limitations, while raw transcripts, packets, private mappings, and raw judge events remain private.",
-             "", "The judge is advisory. It does not change CI behaviour labels or replace a person's review of the source evidence.",
-             "", "## Published review sessions", "", "| Review | Completed | Judge | Candidates |", "|---|---|---|---|"]
-    for review_id, public in rows:
-        judge = f"{public.get('judge_runner', 'unknown')} ({public.get('judge_family', 'unknown')})"
-        count = len(public.get("judgments") or [])
-        completed = str(public.get("completed") or public.get("created") or "not recorded")
-        lines.append(f"| [{review_id}]({review_id}/) | {completed} | {judge} | {count} |")
-    if not rows:
-        lines.append("| (no published reviews yet) | - | - | 0 |")
-    return "\n".join(lines) + "\n"
-
-
-def generate_review_index(reviews_dir: Path | None = None) -> Path:
+def generate_review_summary(reviews_dir: Path | None = None) -> Path:
+    """Rebuild the single public review summary from runs and published reports."""
     reviews_dir = reviews_dir or ROOT / "reviews"
     reviews_dir.mkdir(parents=True, exist_ok=True)
-    (reviews_dir / "SUMMARY.md").write_text(review_summary_text(reviews_dir), encoding="utf-8", newline="\n")
-    output = reviews_dir / "README.md"
-    output.write_text(review_index_text(reviews_dir), encoding="utf-8", newline="\n")
+    output = reviews_dir / "SUMMARY.md"
+    output.write_text(review_summary_text(reviews_dir), encoding="utf-8", newline="\n")
     return output
 
 
-def review_pages_are_current(reviews_dir: Path | None = None) -> bool:
-    """Whether both generated public review pages match their source runs and published reports."""
+def review_summary_is_current(reviews_dir: Path | None = None) -> bool:
+    """Whether the generated public review summary matches its source runs and reports."""
     reviews_dir = reviews_dir or ROOT / "reviews"
     summary = reviews_dir / "SUMMARY.md"
-    index = reviews_dir / "README.md"
-    return summary.is_file() and index.is_file() \
-        and summary.read_text(encoding="utf-8") == review_summary_text(reviews_dir) \
-        and index.read_text(encoding="utf-8") == review_index_text(reviews_dir)
+    return summary.is_file() and summary.read_text(encoding="utf-8") == review_summary_text(reviews_dir)
 
 
 def public_review_url(review_id: str, root: Path | None = None) -> str:
@@ -1248,8 +1226,8 @@ def publish_public_review(public: Path, review_id: str, root: Path | None = None
                 else:
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copytree(public, target)
-                generate_review_index(tree / "reviews")
-                run_git(["add", "--", f"reviews/{review_id}", "reviews/README.md", "reviews/SUMMARY.md"], tree)
+                generate_review_summary(tree / "reviews")
+                run_git(["add", "--", f"reviews/{review_id}", "reviews/SUMMARY.md"], tree)
                 if run_git(["diff", "--cached", "--quiet"], tree, check=False).returncode == 0:
                     return public_review_url(review_id, root)
                 identity = [] if has_git_identity(root) else [
@@ -2539,7 +2517,7 @@ def menu() -> None:
     choice = ask_choice("What do you want to do?", [
         ("batch", "Run the AI coding CLIs on this computer (claude, codex, agy): every model and effort"),
         ("status", "Show my runs"),
-        ("review", "Review unjudged Claude and Codex CLI runs with automatic cross-family judges"),
+        ("review", "Review unjudged transcript-backed runs with automatic cross-family judges"),
         ("doctor", "Check this computer"),
     ])
     if choice == "review":
@@ -2580,8 +2558,8 @@ def build_parser() -> argparse.ArgumentParser:
     results_parser = sub.add_parser("results", help="rebuild runs/RESULTS.md (CI does this after every merge)")
     results_parser.add_argument("--check", action="store_true", help="only check that runs/RESULTS.md is up to date")
     results_parser.add_argument("--quiet", action="store_true", help="don't print the page")
-    review_summary_parser = sub.add_parser("review-summary", help="rebuild generated reviews pages from runs and public reviews")
-    review_summary_parser.add_argument("--check", action="store_true", help="only check that reviews/SUMMARY.md and reviews/README.md are up to date")
+    review_summary_parser = sub.add_parser("review-summary", help="rebuild the generated review summary from runs and public reviews")
+    review_summary_parser.add_argument("--check", action="store_true", help="only check that reviews/SUMMARY.md is up to date")
     review_summary_parser.add_argument("--quiet", action="store_true", help="don't print the generated summary")
 
     review_parser = sub.add_parser("review", help="choose current setting runs, route them cross-family, then publish blinded reviews")
@@ -2636,12 +2614,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                     say(output.read_text(encoding="utf-8"))
         elif args.action == "review-summary":
             if args.check:
-                if not review_pages_are_current():
-                    print("reviews/SUMMARY.md or reviews/README.md is out of date. Run `python run_experiment.py review-summary`.", file=sys.stderr)
+                if not review_summary_is_current():
+                    print("reviews/SUMMARY.md is out of date. Run `python run_experiment.py review-summary`.", file=sys.stderr)
                     return 1
-                say("reviews/SUMMARY.md and reviews/README.md are up to date.")
+                say("reviews/SUMMARY.md is up to date.")
             else:
-                output = generate_review_index()
+                output = generate_review_summary()
                 if not args.quiet:
                     say((ROOT / "reviews" / "SUMMARY.md").read_text(encoding="utf-8"))
         elif args.action == "review":

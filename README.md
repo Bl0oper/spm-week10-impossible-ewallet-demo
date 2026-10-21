@@ -111,10 +111,10 @@ Passing both suites is not proof of correctness. Read the diff.
 | `py -3 run_experiment.py check <diff>` | Run both test suites on any diff without saving a run. |
 | `py -3 run_experiment.py apply-demo <diff>` | Apply a run's diff to your checkout for the [cheating-PR demo](docs/cheating-pr-demo.md). Never merge the result. |
 | `py -3 run_experiment.py results` | Rebuild `runs/RESULTS.md` (CI does this for you). |
-| `py -3 run_experiment.py review` | Show the newest eligible Claude or Codex run for each task revision and configuration, choose by number (or press Enter for all), route it to the other model family, and publish the report plus the consolidated review page. |
+| `py -3 run_experiment.py review` | Show the newest eligible transcript-backed run for each task revision and configuration, choose by number (or press Enter for all), route it to its designated cross-family judge or judges, and publish the report plus the consolidated review page. |
 | `py -3 run_experiment.py review --all` | Review every newly eligible current setting without a selection prompt. |
 | `py -3 run_experiment.py review --all --rejudge` | Intentionally rejudge every current setting, including one with a published cross-family verdict. |
-| `py -3 run_experiment.py review-summary --check` | Verify that the generated review summary and index match all runs and public review reports. |
+| `py -3 run_experiment.py review-summary --check` | Verify that the generated review summary matches all runs and public review reports. |
 | `py -3 -m unittest discover -s runner_tests -t .` | Test the runner itself; uses no AI quota. |
 
 `--local` (on `batch` and `run`) uses this folder's task files and never submits. It's for testing the program.
