@@ -825,7 +825,7 @@ def judge_one_packet_claude(executable: str, packet: Path, rubric: Path, schema:
         workspace.mkdir()
         run_git(["init", "-q"], workspace)
         args = [
-            "--print", "--output-format", "stream-json", "--json-schema", read_text(schema).strip(),
+            "--print", "--output-format", "stream-json", "--verbose", "--json-schema", read_text(schema).strip(),
             "--no-session-persistence", "--safe-mode", "--permission-mode", "plan", "--permission-prompts", "none",
             "--disable-slash-commands", review_prompt(packet, rubric),
         ]
@@ -837,7 +837,10 @@ def judge_one_packet_claude(executable: str, packet: Path, rubric: Path, schema:
                 wrapper.unlink(missing_ok=True)
         if code != 0:
             raise RunError(f"The Claude judge did not finish: {short(raw, 240)}")
-        answer = claude_final_from_stream(raw)
+        # --json-schema puts the validated object in the result event's structured_output.
+        structured = [event["structured_output"] for event in stream_events(raw)
+                      if event.get("type") == "result" and isinstance(event.get("structured_output"), dict)]
+        answer = json.dumps(structured[-1]) if structured else claude_final_from_stream(raw)
         try:
             verdict = validate_judgment(json.loads(answer))
         except json.JSONDecodeError as exc:
