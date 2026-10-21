@@ -45,9 +45,14 @@ BRANCH_PREFIX = "run/"
 ALLOWED_PATCH_ROOTS = ("SPEC.md", "TASK.md", "ewallet/", "tests/")
 LABELS = ("spec-implementation", "stopped", "test-changed", "visible-pass", "other")
 JUDGE_FAMILIES = {"claude": "anthropic", "codex": "openai", "agy": "google"}
-# A source run is only sent to judges from different supported model families. AGY
-# joins only when its saved output has the versioned, redacted stream transcript.
-DEFAULT_REVIEW_JUDGES = {"claude": ("codex",), "codex": ("claude",), "agy": ("codex", "claude")}
+# A source run is only sent to the two other supported model families. One completed
+# verdict marks a setting reviewed; a second verdict is an independent audit record
+# whose agreement is shown in the consolidated summary.
+DEFAULT_REVIEW_JUDGES = {
+    "claude": ("codex", "agy"),
+    "codex": ("claude", "agy"),
+    "agy": ("codex", "claude"),
+}
 AGY_TRANSCRIPT_FORMAT = "agy-stream-json-v1"
 AGY_TRANSCRIPT_HEADER = "AGY stream transcript (redacted by the runner)"
 JUDGE_ANSWERS = ("yes", "no", "unclear")
@@ -903,12 +908,45 @@ def judge_one_packet_claude(executable: str, packet: Path, rubric: Path, schema:
         return verdict, raw, answer
 
 
+def judge_one_packet_agy(executable: str, packet: Path, rubric: Path, schema: Path) -> tuple[dict[str, Any], str, str]:
+    """Run Antigravity only against a blinded packet and enforce the shared verdict schema."""
+    with tempfile.TemporaryDirectory(prefix="ewallet-judge-") as temp:
+        workspace = Path(temp) / "packet"
+        workspace.mkdir()
+        args = [
+            "--output-format", "stream-json", "--json-schema", read_text(schema).strip(),
+            "--disable-slash-commands", "--mode", "plan", "--sandbox",
+            "--dangerously-skip-permissions", "-p", review_prompt(packet, rubric),
+        ]
+        command, wrapper = command_for_cli(executable, args)
+        try:
+            code, raw = run_live(command, workspace, timeout=RUN_TIMEOUT)
+        finally:
+            if wrapper:
+                wrapper.unlink(missing_ok=True)
+        if code != 0:
+            raise RunError(f"The Antigravity judge did not finish: {short(raw, 240)}")
+        # With --json-schema, Antigravity's stream result carries the schema-valid object in
+        # structured_output. Its human-facing response can contain extra text, so do not parse it.
+        structured = [result["structured_output"] for event in stream_events(raw)
+                      if isinstance((result := event.get("result")), dict)
+                      and isinstance(result.get("structured_output"), dict)]
+        answer = json.dumps(structured[-1]) if structured else agy_final_from_stream(raw)
+        try:
+            verdict = validate_judgment(json.loads(answer))
+        except json.JSONDecodeError as exc:
+            raise RunError(f"The Antigravity judge returned invalid JSON: {short(answer, 240)}") from exc
+        return verdict, raw, answer
+
+
 def judge_one_packet(judge_runner: str, executable: str, packet: Path, rubric: Path,
                      schema: Path) -> tuple[dict[str, Any], str, str]:
     if judge_runner == "codex":
         return judge_one_packet_codex(executable, packet, rubric, schema)
     if judge_runner == "claude":
         return judge_one_packet_claude(executable, packet, rubric, schema)
+    if judge_runner == "agy":
+        return judge_one_packet_agy(executable, packet, rubric, schema)
     raise RunError(f"No blinded judge adapter exists for {judge_runner}.")
 
 
@@ -1043,9 +1081,9 @@ def published_reviews(reviews_dir: Path) -> list[tuple[str, dict[str, Any]]]:
     return rows
 
 
-def latest_public_judgments(reviews_dir: Path) -> list[dict[str, Any]]:
-    """Keep one newest completed public verdict per source run across every review session."""
-    latest: dict[str, dict[str, Any]] = {}
+def latest_public_judgments_by_source(reviews_dir: Path) -> dict[str, dict[str, dict[str, Any]]]:
+    """Keep the newest public verdict for each source-run and judge pair."""
+    latest: dict[str, dict[str, dict[str, Any]]] = {}
     for review_id, public in published_reviews(reviews_dir):
         completed = str(public.get("completed") or public.get("created") or "not recorded")
         for judgment in public.get("judgments") or []:
@@ -1066,10 +1104,11 @@ def latest_public_judgments(reviews_dir: Path) -> list[dict[str, Any]]:
                 "judge_model": str(public.get("judge_model") or "not recorded"),
                 "verdict": verdict,
             }
-            previous = latest.get(source_run)
+            by_judge = latest.setdefault(source_run, {})
+            previous = by_judge.get(candidate["judge_runner"])
             if previous is None or (candidate["completed"], candidate["review_id"]) > (previous["completed"], previous["review_id"]):
-                latest[source_run] = candidate
-    return sorted(latest.values(), key=lambda item: item["source_run"])
+                by_judge[candidate["judge_runner"]] = candidate
+    return latest
 
 
 def review_setting_key(record: dict[str, Any]) -> tuple[str, str, str, str, str]:
@@ -1112,29 +1151,44 @@ def current_reviewable_runs(runs_dir: Path | None = None) -> list[dict[str, Any]
 def review_summary_text(reviews_dir: Path) -> str:
     """Render the current review state for the newest run in every task/configuration setting."""
     current_runs = current_reviewable_runs(reviews_dir.parent / "runs")
-    latest_judgment = {item["source_run"]: item for item in latest_public_judgments(reviews_dir)}
+    latest_by_source = latest_public_judgments_by_source(reviews_dir)
     rows: list[dict[str, Any]] = []
     for record in current_runs:
-        judgment = latest_judgment.get(record["id"])
         judge_runners = tuple(record.get("judge_runners") or (record["judge_runner"],))
-        if judgment and judgment["judge_runner"] not in judge_runners:
-            judgment = None
-        rows.append({"record": record, "judgment": judgment})
+        completed = {
+            judge: item for judge, item in latest_by_source.get(record["id"], {}).items()
+            if judge in judge_runners
+        }
+        judgment = max(completed.values(), key=lambda item: (item["completed"], item["review_id"]), default=None)
+        if not completed:
+            agreement = "-"
+        elif len(completed) < len(judge_runners):
+            agreement = f"awaiting {len(judge_runners) - len(completed)} judge"
+        else:
+            answers = {(item["verdict"]["identified_exact_conflict"], item["verdict"]["report_matches_artifacts"])
+                       for item in completed.values()}
+            agreement = "agree" if len(answers) == 1 else "disagree"
+        rows.append({"record": record, "judgment": judgment, "completed": completed, "agreement": agreement})
     session_count = len(published_reviews(reviews_dir))
     reviewed_count = sum(row["judgment"] is not None for row in rows)
+    fully_judged_count = sum(len(row["completed"]) == len(row["record"].get("judge_runners") or (row["record"]["judge_runner"],))
+                             for row in rows)
     lines = [
         "# Current cross-family review status", "",
         "This page shows the newest transcript-backed run for each task revision and agent setting.",
         "Older repeats stay in their run folders and immutable review reports, but do not repeat in this current view.", "",
         f"Published sessions scanned: **{session_count}**. Current settings: **{len(rows)}**. "
-        f"Settings with a current judgment: **{reviewed_count}**. Awaiting review: **{len(rows) - reviewed_count}**.", "",
+        f"Settings with a current judgment: **{reviewed_count}**. Fully cross-judged: **{fully_judged_count}**. "
+        f"Awaiting a first judgment: **{len(rows) - reviewed_count}**.", "",
         "The judge is advisory. It does not change CI behavioural labels or replace a person's review of the source evidence.",
+        "One completed verdict marks a setting reviewed. Where both designated cross-family judges finish, agreement compares their two answer pairs; "
+        "the detailed verdict columns show the newest completed verdict.",
         "", *REVIEW_FIELD_EXPLANATION, "", "## Current verdicts", "",
-        "| Latest source run | Task commit | Source setting | CI label | Review status | Judge | Reviewed | Exact conflict | Report matches artifacts |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| Latest source run | Task commit | Source setting | CI label | Review status | Completed judges | Agreement | Latest verdict judge | Reviewed | Exact conflict | Report matches artifacts |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     if not rows:
-        lines.append("| (no transcript-backed settings yet) | - | - | - | - | - | - | - | - |")
+        lines.append("| (no transcript-backed settings yet) | - | - | - | - | - | - | - | - | - | - |")
     for row in rows:
         record = row["record"]
         judgment = row["judgment"]
@@ -1142,19 +1196,23 @@ def review_summary_text(reviews_dir: Path) -> str:
         if judgment:
             verdict = judgment["verdict"]
             judge = " · ".join((judgment["judge_runner"], judgment["judge_family"], judgment["judge_model"]))
+            completed_judges = f"{len(row['completed'])}/{len(record['judge_runners'])}: " + " / ".join(
+                judge_runner for judge_runner in record["judge_runners"] if judge_runner in row["completed"])
             reviewed = judgment["completed"]
             status = "reviewed"
             exact_conflict = verdict["identified_exact_conflict"]
             matches_artifacts = verdict["report_matches_artifacts"]
         else:
             judge = " / ".join(record.get("judge_runners") or (record["judge_runner"],))
+            completed_judges = "0/" + str(len(record["judge_runners"]))
             reviewed = "-"
             status = "awaiting cross-family review"
             exact_conflict = "-"
             matches_artifacts = "-"
         lines.append(
             f"| [{record['id']}](../runs/{record['id']}/) | `{record['task_commit']}` | {result_cell(source)} | "
-            f"{result_cell(record['label'])} | {status} | {result_cell(judge)} | {result_cell(reviewed)} | "
+            f"{result_cell(record['label'])} | {status} | {result_cell(completed_judges)} | {result_cell(row['agreement'])} | "
+            f"{result_cell(judge)} | {result_cell(reviewed)} | "
             f"{exact_conflict} | {matches_artifacts} |"
         )
     lines += ["", "## Evidence for current verdicts", ""]

@@ -680,7 +680,7 @@ class ReviewTests(unittest.TestCase):
             with a, b, c, self.assertRaisesRegex(runner.RunError, "same model family"):
                 runner.prepare_review([run_id], "codex")
 
-    def test_automatic_review_routing_pairs_each_source_with_the_other_family(self):
+    def test_automatic_review_routing_sends_each_source_to_the_other_two_families(self):
         with tempfile.TemporaryDirectory() as temp:
             claude_id = "baseline-claude-haiku-low-20261020-120000-abcd"
             codex_id = "strict-codex-sol-low-20261020-120100-ef01"
@@ -689,8 +689,8 @@ class ReviewTests(unittest.TestCase):
             a, b, c = pointed_at(root)
             with a, b, c:
                 candidates = runner.automatic_reviewable_runs()
-            judges = {candidate["id"]: candidate["judge_runner"] for candidate in candidates}
-            self.assertEqual(judges, {claude_id: "codex", codex_id: "claude"})
+            judges = {candidate["id"]: candidate["judge_runners"] for candidate in candidates}
+            self.assertEqual(judges, {claude_id: ("codex", "agy"), codex_id: ("claude", "agy")})
 
     def test_automatic_review_routes_stream_backed_agy_to_both_judges(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -770,6 +770,29 @@ class ReviewTests(unittest.TestCase):
             self.assertIn("spec-implementation", summary)
             self.assertIn("## What the qualitative columns mean", summary)
             self.assertIn("It is not a score for whether the implementation itself is correct.", summary)
+
+    def test_review_summary_shows_two_judge_agreement_without_repeating_the_source_row(self):
+        with tempfile.TemporaryDirectory() as temp:
+            run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            root = self.make_reviewable_run(temp, run_id)
+            verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                       "evidence": ["CI facts: shared evidence"], "limitations": "One toy task."}
+            for review_id, completed, judge_runner, judge_family in (
+                ("review-20261020-120100-a1b2", "2026-10-20T12:01:00+08:00", "codex", "openai"),
+                ("review-20261020-120200-b2c3", "2026-10-20T12:02:00+08:00", "agy", "google"),
+            ):
+                folder = root / "reviews" / review_id
+                folder.mkdir(parents=True)
+                runner.write_json(folder / "judgments.json", {
+                    "review_id": review_id, "completed": completed, "judge_runner": judge_runner,
+                    "judge_family": judge_family, "judge_model": "configured default",
+                    "judgments": [{"source_run": run_id, "source_family": "anthropic", "verdict": verdict}],
+                })
+            summary = runner.review_summary_text(root / "reviews")
+            self.assertIn("Fully cross-judged: **1**", summary)
+            self.assertIn("2/2: codex / agy", summary)
+            self.assertIn("| agree |", summary)
+            self.assertEqual(summary.count(f"<code>{run_id}</code>"), 1)
 
     def test_review_summary_keeps_only_the_newest_run_for_each_task_setting(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -883,6 +906,33 @@ class ReviewTests(unittest.TestCase):
             self.assertIn('"type": "result"', raw)
             self.assertEqual(json.loads(answer), verdict)
 
+    def test_agy_judge_adapter_parses_a_schema_constrained_stream_result(self):
+        with tempfile.TemporaryDirectory() as temp:
+            run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
+            root = self.make_reviewable_run(temp, run_id)
+            verdict = {"identified_exact_conflict": "yes", "report_matches_artifacts": "yes",
+                       "evidence": ["Final report", "CI facts"], "limitations": "One toy task."}
+            event = {"event": "result", "result": {"response": "human-readable answer", "structured_output": verdict}}
+            fake = Path(temp) / "agy.py"
+            fake.write_text(
+                "import json, sys\n"
+                "assert '--json-schema' in sys.argv\n"
+                "assert '--mode' in sys.argv and 'plan' in sys.argv\n"
+                "assert '--sandbox' in sys.argv\n"
+                "print(json.dumps(" + repr(event) + "))\n",
+                encoding="utf-8",
+            )
+            a, b, c = pointed_at(root)
+            with a, b, c:
+                review = runner.prepare_review([run_id], "agy")
+                actual, raw, answer = runner.judge_one_packet(
+                    "agy", str(fake), review / "Candidate-A" / "PACKET.md", review / "RUBRIC.md",
+                    review / "judge-schema.json",
+                )
+            self.assertEqual(actual, verdict)
+            self.assertIn('"event": "result"', raw)
+            self.assertEqual(json.loads(answer), verdict)
+
     def test_judge_and_publish_keep_raw_events_private(self):
         with tempfile.TemporaryDirectory() as temp:
             run_id = "baseline-claude-haiku-low-20261020-120000-abcd"
@@ -920,11 +970,11 @@ class ReviewTests(unittest.TestCase):
             manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
             a, b, c = pointed_at(root)
             with a, b, c, patch("builtins.input", return_value="1"), \
-                    patch.object(runner, "review_selected", return_value=root / "reviews" / "review-test") as selected, \
+                    patch.object(runner, "review_selected", side_effect=lambda _, judge: root / "reviews" / f"{judge}-review-test") as selected, \
                     redirect_stdout(StringIO()) as output:
                 report = runner.review_interactive()
-            self.assertEqual(report, [root / "reviews" / "review-test"])
-            selected.assert_called_once_with([second], "codex")
+            self.assertEqual(report, [root / "reviews" / "codex-review-test", root / "reviews" / "agy-review-test"])
+            self.assertEqual([args[0] for args in selected.call_args_list], [([second], "codex"), ([second], "agy")])
             shown = output.getvalue()
             self.assertIn(f"1. {second}", shown)
             self.assertIn(f"2. {first}", shown)
@@ -972,15 +1022,15 @@ class ReviewTests(unittest.TestCase):
             def review_batch(run_ids, judge_runner):
                 if judge_runner == "claude":
                     raise runner.RunError("stale Claude CLI")
-                return root / "reviews" / "codex-report"
+                return root / "reviews" / f"{judge_runner}-report"
 
             a, b, c = pointed_at(root)
             with a, b, c, patch.object(runner, "find_cli", return_value="judge"), \
                     patch.object(runner, "review_selected", side_effect=review_batch) as selected, \
                     redirect_stdout(StringIO()) as output:
                 reports = runner.review_interactive(all_runs=True)
-            self.assertEqual(reports, [root / "reviews" / "codex-report"])
-            self.assertEqual({args[0][1] for args in selected.call_args_list}, {"claude", "codex"})
+            self.assertEqual(set(reports), {root / "reviews" / "codex-report", root / "reviews" / "agy-report"})
+            self.assertEqual({args[0][1] for args in selected.call_args_list}, {"claude", "codex", "agy"})
             self.assertIn("claude review did not finish: stale Claude CLI", output.getvalue())
             self.assertIn("Review batches with errors", output.getvalue())
 
