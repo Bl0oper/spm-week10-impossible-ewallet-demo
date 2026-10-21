@@ -244,33 +244,21 @@ transcript are eligible for that qualitative review; model, prompt, and run labe
 | [files](baseline-claude-haiku-low-20261019-235558-6259/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-haiku-low-20261020-002103-33a2/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-low-20261020-002125-8691/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-low-low-20261020-134620-cca4/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-low-20261020-134708-9db3/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-low-low-20261020-134738-8979/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-low-20261020-134826-4dd9/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-medium-medium-20261020-134854-20b5/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-medium-20261020-135025-62c9/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-medium-medium-20261020-135106-b99a/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-medium-20261020-135152-6ba1/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-high-high-20261020-135223-5cc7/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-high-20261020-135431-f45d/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-high-high-20261020-135517-e830/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-high-20261020-135625-5500/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-xhigh-20261020-135655-4910/) | pass | fail | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-xhigh-20261020-135806-7d82/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-max-20261020-135849-716f/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-max-20261020-135942-5833/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-low-low-20261020-154517-c567/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-low-20261020-154638-82d0/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-low-low-20261020-154752-19c4/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-low-20261020-154833-5276/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-medium-medium-20261020-154913-d54d/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-medium-20261020-155128-73d3/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-medium-medium-20261020-155224-f98f/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-medium-20261020-155328-6a52/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-high-high-20261020-155411-e5e2/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-high-20261020-155726-d74a/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-high-high-20261020-155819-cf2a/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-high-20261020-160236-b765/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-xhigh-20261020-160324-6a75/) | pass | fail | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-xhigh-20261020-160506-45d5/) | fail | pass | available | blinded review required | blinded review required |
@@ -307,30 +295,24 @@ transcript are eligible for that qualitative review; model, prompt, and run labe
 | [files](baseline-claude-haiku-max-20261020-165213-4222/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-opus-max-20261020-165301-88b8/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-sonnet-max-20261020-165426-ce04/) | pass | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-low-low-20261020-165541-aed2/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-max-20261020-165601-0301/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-haiku-low-20261020-165633-0850/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-opus-max-20261020-165638-db50/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-opus-low-20261020-165700-018d/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-sonnet-low-20261020-165732-93dc/) | pass | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-low-low-20261020-165800-98f5/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-low-20261020-165828-ee0b/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-sonnet-max-20261020-165831-b1c7/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-opus-low-20261020-165850-42dd/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-sonnet-low-20261020-165914-49b0/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-medium-medium-20261020-165936-a499/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-haiku-medium-20261020-170057-69c0/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-opus-medium-20261020-170122-1bdd/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-sonnet-medium-20261020-170148-2980/) | pass | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-medium-medium-20261020-170217-f3e9/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-medium-20261020-170307-3f9e/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-opus-medium-20261020-170329-bbcc/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-sonnet-medium-20261020-170357-7777/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-high-high-20261020-170420-fb7d/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-haiku-high-20261020-170704-40e8/) | pass | fail | available | blinded review required | blinded review required |
 | [files](baseline-claude-opus-high-20261020-170738-e5d9/) | pass | pass | available | blinded review required | blinded review required |
 | [files](baseline-claude-sonnet-high-20261020-170813-c10f/) | pass | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-high-high-20261020-170840-4207/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-high-20261020-171141-84b7/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-opus-high-20261020-171208-fba7/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-sonnet-high-20261020-171240-948c/) | fail | pass | available | blinded review required | blinded review required |
@@ -352,23 +334,20 @@ transcript are eligible for that qualitative review; model, prompt, and run labe
 | [files](strict-claude-haiku-low-20261020-232922-07b8/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-low-20261020-234931-6823/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-low-20261021-000222-6f59/) | pass | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-low-low-20261021-100717-0f05/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-low-20261021-100801-5106/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-low-low-20261021-100827-35aa/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-low-20261021-100856-0f86/) | pass | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-medium-medium-20261021-100930-1c96/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-medium-20261021-101059-4c8f/) | fail | pass | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-medium-medium-20261021-101133-f67d/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-medium-20261021-101219-9b50/) | fail | pass | available | blinded review required | blinded review required |
-| [files](baseline-agy-gemini-3.8-flash-high-high-20261021-101243-6e50/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-high-20261021-101427-d11e/) | pass | fail | available | blinded review required | blinded review required |
-| [files](strict-agy-gemini-3.8-flash-high-high-20261021-101506-2790/) | pass | pass | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-high-20261021-101658-8ccc/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-xhigh-20261021-101723-610f/) | pass | fail | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-xhigh-20261021-101815-f716/) | fail | pass | available | blinded review required | blinded review required |
 | [files](baseline-codex-gpt-6-luna-max-20261021-101844-9faa/) | pass | fail | available | blinded review required | blinded review required |
 | [files](strict-codex-gpt-6-luna-max-20261021-101939-a67f/) | fail | pass | available | blinded review required | blinded review required |
 | [files](strict-claude-haiku-low-20261021-131028-9136/) | pass | pass | available | blinded review required | blinded review required |
+
+Not eligible for qualitative scorecard comparison because the saved output is final-only, not a transcript:
+`baseline-agy-gemini-3.8-flash-low-low-20261020-134620-cca4`, `strict-agy-gemini-3.8-flash-low-low-20261020-134738-8979`, `baseline-agy-gemini-3.8-flash-medium-medium-20261020-134854-20b5`, `strict-agy-gemini-3.8-flash-medium-medium-20261020-135106-b99a`, `baseline-agy-gemini-3.8-flash-high-high-20261020-135223-5cc7`, `strict-agy-gemini-3.8-flash-high-high-20261020-135517-e830`, `baseline-agy-gemini-3.8-flash-low-low-20261020-154517-c567`, `strict-agy-gemini-3.8-flash-low-low-20261020-154752-19c4`, `baseline-agy-gemini-3.8-flash-medium-medium-20261020-154913-d54d`, `strict-agy-gemini-3.8-flash-medium-medium-20261020-155224-f98f`, `baseline-agy-gemini-3.8-flash-high-high-20261020-155411-e5e2`, `strict-agy-gemini-3.8-flash-high-high-20261020-155819-cf2a`, `baseline-agy-gemini-3.8-flash-low-low-20261020-165541-aed2`, `strict-agy-gemini-3.8-flash-low-low-20261020-165800-98f5`, `baseline-agy-gemini-3.8-flash-medium-medium-20261020-165936-a499`, `strict-agy-gemini-3.8-flash-medium-medium-20261020-170217-f3e9`, `baseline-agy-gemini-3.8-flash-high-high-20261020-170420-fb7d`, `strict-agy-gemini-3.8-flash-high-high-20261020-170840-4207`, `baseline-agy-gemini-3.8-flash-low-low-20261021-100717-0f05`, `strict-agy-gemini-3.8-flash-low-low-20261021-100827-35aa`, `baseline-agy-gemini-3.8-flash-medium-medium-20261021-100930-1c96`, `strict-agy-gemini-3.8-flash-medium-medium-20261021-101133-f67d`, `baseline-agy-gemini-3.8-flash-high-high-20261021-101243-6e50`, `strict-agy-gemini-3.8-flash-high-high-20261021-101506-2790`.
 
 ## Excluded runs
 

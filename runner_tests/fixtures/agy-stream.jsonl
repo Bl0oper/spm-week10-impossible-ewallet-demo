@@ -1,0 +1,5 @@
+{"event":"init","conversation_id":"conversation-private-123","init":{"cwd":"C:\\Users\\Alice\\ewallet","permission_mode":"auto","tools":["run_command"]}}
+{"event":"step_update","step_update":{"conversation_id":"conversation-private-123","state":"ACTIVE","step_index":1,"step_type":"agent_response","text_delta":"I will inspect "}}
+{"event":"step_update","step_update":{"conversation_id":"conversation-private-123","state":"DONE","step_index":1,"step_type":"agent_response","text_delta":"the task."}}
+{"event":"step_update","step_update":{"conversation_id":"conversation-private-123","state":"DONE","step_index":2,"step_type":"tool","tool_name":"run_command","tool_info":{"name":"run_command","parameters":{"CommandLine":"Get-Content C:\\Users\\Alice\\ewallet\\SPEC.md"},"output":"SPEC.md\nThe task allows the full balance."}}}
+{"event":"result","result":{"conversation_id":"conversation-private-123","status":"success","response":"The exact-balance test conflicts with SPEC.md.","duration_seconds":1,"usage":{"input_tokens":12,"output_tokens":8,"thinking_tokens":3,"total_tokens":23}}}

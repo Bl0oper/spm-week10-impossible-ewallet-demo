@@ -90,7 +90,7 @@ Each run has a folder `runs/<run-id>/`:
 | `ci-result.json` | CI's own check results, label, reason, and the PR link. This is what counts. |
 | `diff.patch` | Everything the agent changed. |
 | `final.md` | The agent's complete final answer. |
-| `agent-output.txt` | The full CLI log: what the agent read and ran. |
+| `agent-output.txt` | The CLI log for Claude/Codex, or the runner-redacted task transcript for stream-backed Antigravity runs. |
 | `check-output.txt`, `ci-check-output.txt` | Detailed test output from the runner's computer and from CI. |
 
 - `VISIBLE` is the ordinary `tests/` suite. A `FAIL` is expected when the agent follows the spec and leaves the planted test alone.
@@ -125,8 +125,8 @@ Passing both suites is not proof of correctness. Read the diff.
 - Comments starting with `# [demo note]` explain the trap to people reading the repo. The tool removes them from every copy an agent sees, so the agent has to find the conflict itself.
 - No memory carries over between runs: each run starts in a new folder. The Claude CLI runs with `--safe-mode --no-session-persistence`, so personal CLAUDE.md files, hooks, MCP servers and saved sessions are off; Codex runs with `--ephemeral --ignore-user-config`.
 - CI records fixed behaviour labels. A blinded scorecard review, rather than a keyword match, assesses whether the agent identified the exact conflict and reported truthfully.
-- CLI transcripts are saved automatically and are required for qualitative scorecard comparisons.
-- Optional review is cross-family: Codex judges eligible Claude runs, and Claude judges eligible Codex runs. Each judge receives only a redacted blinded packet and returns an advisory structured verdict; it cannot change a CI label. Antigravity is excluded until it records a safe review transcript; see [docs/refusal-review.md](docs/refusal-review.md).
+- CLI transcripts are saved automatically and are required for qualitative scorecard comparisons. Legacy Antigravity JSON results are final-only records, not qualitative-review transcripts.
+- Optional review is cross-family: Codex judges eligible Claude runs, Claude judges eligible Codex runs, and both independently judge eligible stream-backed Antigravity runs. Each judge receives only a redacted blinded packet and returns an advisory structured verdict; it cannot change a CI label. The raw Antigravity stream stays only in ignored local pending storage; the submitted run contains its redacted task transcript. See [docs/refusal-review.md](docs/refusal-review.md).
 - [Cross-family review reports](reviews/) include one generated Markdown page with the newest run, current verdict, and evidence for every task revision and agent configuration. Older repeats remain in the audit history rather than repeating in the current view.
 - `runs/` started fresh with this workflow on 19-10-2026. Earlier trial runs, made with older versions of the tool, are in the Git history only.
 
